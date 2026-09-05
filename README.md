@@ -1,42 +1,55 @@
-[README.md](https://github.com/user-attachments/files/31861555/README.md)
-# Delhi + Amritsar Trip Companion
+[README.md](https://github.com/user-attachments/files/31861614/README.md)
+# Delhi + Amritsar Trip Companion — v2
 
-Mobile-first static PWA for the 10–14 October 2026 Delhi + Amritsar family trip.
+Mobile-first GitHub Pages PWA for the 10–14 October 2026 family trip.
 
-## Features
-- Full trip itinerary
-- Booked ticket details
-- Editable ticket expenses
-- Agency/package cost
-- Daily expense tracker
-- Total budget dashboard
-- Reminders/checklist
-- Hotel, food and general notes
-- Local browser saving
-- JSON backup/import
-- Offline support via service worker
-- Installable on mobile as a PWA
+## New in v2
+- **Today screen**: automatically previews the relevant trip day and next important step.
+- **Map Help**: day-wise stops, full routes, and "Directions" buttons that open Google Maps.
+- **Hindi Travel Helper**: offline phrasebook for taxi, hotel, railway, food, shopping, and help.
+- **Show Large** mode: display the Hindi sentence clearly to another person.
+- **Speak Hindi**: uses the phone/browser speech engine when a Hindi voice is available.
+- **Trip details**: save final Delhi/Amritsar hotel addresses and driver numbers.
+- **Reminders with optional date/time**.
+- Existing ticket, expense, package cost, notes, backup and offline support retained.
 
-## Publish on GitHub Pages
-1. Create a new GitHub repository, for example `delhi-amritsar-trip`.
-2. Upload all files in this folder to the repository root.
-3. In GitHub, open **Settings → Pages**.
-4. Under **Build and deployment**, choose **Deploy from a branch**.
-5. Choose branch `main` and folder `/root`.
-6. Save.
-7. GitHub will provide a URL similar to:
-   `https://YOUR-USERNAME.github.io/delhi-amritsar-trip/`
+## Existing saved data
+The app intentionally keeps the same browser storage key as v1 (`delhi_amritsar_trip_v1`).
+If you update the same GitHub Pages site and use the same browser, your previously entered ticket/expense data should continue to load.
 
-## Install on your phone
-- Android/Chrome: open the GitHub Pages link → browser menu → **Add to Home screen / Install app**.
-- iPhone/Safari: open the link → **Share → Add to Home Screen**.
+Still, **export a backup before replacing the old app**.
 
-## Data & privacy
-Trip information is saved only in the browser's localStorage. It is not sent to a server.
-Use **Notes → Export backup** before travelling so you have a copy of your data.
+## Publish / update on GitHub Pages
+If this is a new repo:
+1. Create a GitHub repository, for example `delhi-amritsar-trip`.
+2. Upload all files from this folder to the repository root.
+3. Go to **Settings → Pages**.
+4. Select **Deploy from a branch** → `main` → `/root`.
+5. Save.
 
-## Important
-Because this is a static GitHub Pages app:
-- Data does not automatically sync between different phones.
-- Ticket PDFs/images are not uploaded to a server.
-- PNR and personal booking details you enter remain on that device/browser.
+If you already published v1:
+1. Open the existing repository.
+2. Replace `index.html`, `sw.js`, `manifest.webmanifest`, `icon.svg`, and `README.md` with these v2 files.
+3. Keep `.nojekyll`.
+4. Commit the changes.
+5. GitHub Pages will redeploy automatically.
+6. If your phone still shows the older app, close/reopen it or refresh once; v2 uses a new service-worker cache.
+
+## Install on phone
+- Android/Chrome: open the GitHub Pages URL → menu → **Install app / Add to Home screen**.
+- iPhone/Safari: open URL → Share → **Add to Home Screen**.
+
+## Storage & privacy
+- Ticket details, PNRs, expenses, notes, hotel addresses, and reminders are stored in the browser's `localStorage`.
+- They are **not synced to a server**.
+- They will not automatically appear on another phone/browser.
+- Do not store Aadhaar/PAN numbers, payment card details, CVV, passwords, or OTPs.
+- Export a backup before the trip and keep that JSON file private.
+
+## Maps
+Map buttons open Google Maps using standard Google Maps URLs. No paid Maps API key is required.
+For best directions, enter your exact final hotel addresses under **More → Trip details**.
+
+## Offline
+The app shell, itinerary, Hindi helper, expenses, reminders and notes work offline after the first load.
+Google Maps itself requires the Maps app / network data unless you separately download offline maps in Google Maps.
