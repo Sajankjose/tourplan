@@ -1,6 +1,14 @@
-# Delhi + Amritsar Trip Companion — v2
+# Delhi + Amritsar Trip Companion — v3
 
 Mobile-first GitHub Pages PWA for the 10–14 October 2026 family trip.
+
+## New in v3
+- Explicit **Save Ticket Details** button on each booked ticket.
+- Clear status such as **Saved on this device** with date/time.
+- Autosave remains active while you type.
+- **Save All Trip Data** button under More → Trip details.
+- Global last-saved confirmation.
+- Same browser storage key as v1/v2, so existing data is preserved on the same site/browser.
 
 ## New in v2
 - **Today screen**: automatically previews the relevant trip day and next important step.
