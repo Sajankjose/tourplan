@@ -1,0 +1,16 @@
+{
+  "name": "Delhi + Amritsar Trip Companion",
+  "short_name": "Trip Companion",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f6f7f9",
+  "theme_color": "#111827",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

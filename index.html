@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <meta name="description" content="Mobile trip companion for Delhi and Amritsar, 10–14 October 2026." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <title>Delhi + Amritsar Trip</title>
+  <style>
+    :root{
+      --bg:#f6f7f9;--card:#ffffff;--text:#15181d;--muted:#69707a;--line:#e6e8ec;
+      --accent:#0f766e;--accent2:#ecfdf5;--danger:#b42318;--warn:#b54708;
+      --radius:18px;--shadow:0 7px 26px rgba(17,24,39,.06);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    .app{max-width:900px;margin:auto;padding:14px 14px 92px}
+    .hero{background:linear-gradient(135deg,#111827,#243044);color:white;border-radius:24px;padding:20px;box-shadow:var(--shadow)}
+    .eyebrow{font-size:12px;opacity:.72;text-transform:uppercase;letter-spacing:.08em}
+    .hero h1{font-size:25px;line-height:1.1;margin:6px 0 8px}
+    .hero p{margin:0;color:#d7dce3;font-size:14px}
+    .hero-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:16px}
+    .hero-stat{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);padding:11px;border-radius:14px}
+    .hero-stat b{display:block;font-size:17px}.hero-stat span{font-size:11px;color:#cbd5e1}
+    .tabs{display:flex;gap:8px;overflow:auto;padding:14px 0 8px;scrollbar-width:none;position:sticky;top:0;background:linear-gradient(var(--bg) 76%,transparent);z-index:20}
+    .tabs::-webkit-scrollbar{display:none}
+    .tab{border:1px solid var(--line);background:var(--card);padding:10px 14px;border-radius:999px;white-space:nowrap;color:var(--muted)}
+    .tab.active{background:var(--accent2);color:var(--accent);border-color:#a7f3d0;font-weight:700}
+    .section{display:none}.section.active{display:block}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin:10px 0}
+    .card h2,.card h3{margin:0 0 8px}
+    .card h2{font-size:18px}.card h3{font-size:16px}
+    .muted{color:var(--muted);font-size:13px}
+    .timeline{display:grid;gap:10px}
+    .day{display:grid;grid-template-columns:62px 1fr;gap:12px}
+    .date{font-weight:800;color:var(--accent);font-size:13px}
+    .date small{display:block;color:var(--muted);font-weight:500;margin-top:2px}
+    .daybody{border-left:2px solid #d7efe8;padding-left:14px}
+    .item{padding:8px 0;border-bottom:1px dashed var(--line)}
+    .item:last-child{border-bottom:0}.time{font-weight:700;font-size:13px;margin-right:7px}
+    .pillrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+    .pill{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:6px 9px;background:#fafafa}
+    .grid2{display:grid;gap:10px}
+    .summary{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .summary .box{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fbfbfc}
+    .summary b{display:block;font-size:19px}.summary span{font-size:12px;color:var(--muted)}
+    label{display:block;font-size:12px;color:var(--muted);margin:10px 0 5px}
+    input,select,textarea{width:100%;border:1px solid var(--line);background:white;border-radius:12px;padding:12px;color:var(--text);min-height:44px}
+    textarea{resize:vertical}
+    .btn{border:0;background:var(--accent);color:white;padding:11px 14px;border-radius:12px;font-weight:700;min-height:44px}
+    .btn.secondary{background:white;color:var(--text);border:1px solid var(--line)}
+    .btn.danger{background:#fff5f4;color:var(--danger);border:1px solid #fecaca}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .expense-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+    .expense-row:last-child{border-bottom:0}
+    .expense-row strong{font-size:14px}.expense-row small{display:block;color:var(--muted);margin-top:2px}
+    .amount{font-weight:800}
+    .ticket{border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:10px;background:#fcfcfd}
+    .ticket-head{display:flex;justify-content:space-between;gap:12px;align-items:start}
+    .ticket h3{margin:0}.route{font-size:14px;font-weight:800}.sub{font-size:12px;color:var(--muted);margin-top:3px}
+    .check{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line)}
+    .check:last-child{border-bottom:0}.check input{width:19px;height:19px;min-height:auto;margin-top:2px}
+    .progress{height:8px;background:#e9ecef;border-radius:999px;overflow:hidden;margin-top:8px}.progress>div{height:100%;background:var(--accent);width:0}
+    .note{background:#fffdf5;border:1px solid #f5e6a8;color:#6b5b11;padding:12px;border-radius:14px;font-size:13px}
+    .footer-note{font-size:11px;color:var(--muted);text-align:center;margin-top:18px}
+    .bottomnav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.97);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);z-index:50;padding-bottom:env(safe-area-inset-bottom)}
+    .bottomnav button{border:0;background:transparent;padding:9px 3px 8px;color:var(--muted);font-size:11px}
+    .bottomnav button b{display:block;font-size:17px;margin-bottom:2px}.bottomnav button.active{color:var(--accent)}
+    .right{float:right}
+    .danger-text{color:var(--danger)}
+    @media(min-width:700px){
+      .app{padding:22px 22px 42px}.grid2{grid-template-columns:1fr 1fr}.bottomnav{display:none}
+      .hero h1{font-size:32px}.hero-grid{max-width:520px}.tabs{top:0}
+    }
+  </style>
+</head>
+<body>
+<div class="app" id="app">
+  <section class="hero">
+    <div class="eyebrow">Family trip · 4 travellers</div>
+    <h1>Delhi + Amritsar</h1>
+    <p>10–14 October 2026 · Mobile trip companion</p>
+    <div class="hero-grid">
+      <div class="hero-stat"><b>5</b><span>Days</span></div>
+      <div class="hero-stat"><b id="heroSpent">₹0</b><span>Expenses logged</span></div>
+      <div class="hero-stat"><b id="heroDone">0%</b><span>Checklist done</span></div>
+    </div>
+  </section>
+
+  <div class="tabs" aria-label="Trip sections">
+    <button class="tab active" data-target="plan">Plan</button>
+    <button class="tab" data-target="tickets">Tickets</button>
+    <button class="tab" data-target="expenses">Expenses</button>
+    <button class="tab" data-target="reminders">Reminders</button>
+    <button class="tab" data-target="notes">Notes</button>
+  </div>
+
+  <section class="section active" id="plan">
+    <div class="card">
+      <h2>Trip overview</h2>
+      <div class="timeline">
+        <div class="day">
+          <div class="date">10 OCT<small>Saturday</small></div>
+          <div class="daybody">
+            <h3>Delhi arrival + relaxed food day</h3>
+            <div class="item"><span class="time">05:30</span>Kochi flight departure</div>
+            <div class="item"><span class="time">08:45</span>Arrive Delhi</div>
+            <div class="item"><span class="time">~10:30</span>Hotel luggage drop, Karol Bagh</div>
+            <div class="item"><span class="time">12:00–13:00</span>Lunch at Andhra Bhavan Canteen</div>
+            <div class="item"><span class="time">13:10–13:50</span>Gurudwara Bangla Sahib</div>
+            <div class="item"><span class="time">~14:15</span>Hotel check-in</div>
+            <div class="item"><span class="time">14:30–17:30</span>Rest</div>
+            <div class="item"><span class="time">18:15–20:00</span>Karol Bagh market + kulfi</div>
+          </div>
+        </div>
+
+        <div class="day">
+          <div class="date">11 OCT<small>Sunday</small></div>
+          <div class="daybody">
+            <h3>Full Delhi sightseeing</h3>
+            <div class="item"><span class="time">09:00</span>Start from hotel</div>
+            <div class="pillrow">
+              <span class="pill">Raj Ghat</span><span class="pill">India Gate</span><span class="pill">Kartavya Path</span>
+              <span class="pill">Rashtrapati Bhavan drive-past</span><span class="pill">Parliament area</span>
+              <span class="pill">Indira Gandhi Memorial / Teen Murti</span><span class="pill">Red Fort</span>
+              <span class="pill">Chandni Chowk</span><span class="pill">Birla Mandir if time</span>
+            </div>
+            <p class="muted">Qutub Minar and Lotus Temple intentionally excluded.</p>
+          </div>
+        </div>
+
+        <div class="day">
+          <div class="date">12 OCT<small>Monday</small></div>
+          <div class="daybody">
+            <h3>Delhi → Amritsar + local evening</h3>
+            <div class="item"><span class="time">~06:10</span>Leave Delhi hotel</div>
+            <div class="item"><span class="time">07:20–13:30</span>Train to Amritsar</div>
+            <div class="item"><span class="time">~14:15</span>Hotel / freshen up</div>
+            <div class="item"><span class="time">14:45–15:30</span>Light lunch</div>
+            <div class="item"><span class="time">15:30–16:15</span>Rest</div>
+            <div class="item"><span class="time">16:30–17:15</span>Hall Bazaar</div>
+            <div class="item"><span class="time">17:15–17:35</span>Lassi stop</div>
+            <div class="item"><span class="time">17:40–18:00</span>Heritage Street walk</div>
+            <div class="item"><span class="time">18:00–19:15</span>Golden Temple evening visit</div>
+            <div class="item"><span class="time">19:20–20:00</span>Punjabi dinner</div>
+          </div>
+        </div>
+
+        <div class="day">
+          <div class="date">13 OCT<small>Tuesday</small></div>
+          <div class="daybody">
+            <h3>Main Amritsar day</h3>
+            <div class="item">Golden Temple proper visit + Amritsari breakfast</div>
+            <div class="item">Jallianwala Bagh + Old City</div>
+            <div class="item">Lunch + short hotel rest</div>
+            <div class="item"><span class="time">~14:30</span>Leave for Attari–Wagah Border</div>
+            <div class="item">Border ceremony → dinner → hotel</div>
+          </div>
+        </div>
+
+        <div class="day">
+          <div class="date">14 OCT<small>Wednesday</small></div>
+          <div class="daybody">
+            <h3>Amritsar → Kochi</h3>
+            <div class="item"><span class="time">~05:00</span>Wake up</div>
+            <div class="item"><span class="time">~05:45</span>Leave hotel</div>
+            <div class="item"><span class="time">~06:30</span>Reach airport</div>
+            <div class="item"><span class="time">08:20</span>Flight departure</div>
+            <div class="note">Ask the hotel for a packed breakfast the previous evening.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="tickets">
+    <div class="card">
+      <h2>Booked tickets</h2>
+      <p class="muted">Enter your actual ticket costs and booking details. They automatically flow into the expense total.</p>
+
+      <div class="ticket">
+        <div class="ticket-head">
+          <div><div class="route">✈ Kochi → Delhi</div><div class="sub">10 Oct · 05:30 → 08:45</div></div>
+          <div class="amount" id="ticketAmt0">₹0</div>
+        </div>
+        <div class="grid2">
+          <div><label>Airline / flight no.</label><input data-ticket="0" data-field="carrier" placeholder="e.g. IndiGo 6E..." /></div>
+          <div><label>PNR / booking ref</label><input data-ticket="0" data-field="pnr" placeholder="Enter PNR" /></div>
+          <div><label>Total ticket cost for 4 (₹)</label><input data-ticket="0" data-field="amount" type="number" min="0" inputmode="numeric" placeholder="0" /></div>
+          <div><label>Seats / terminal</label><input data-ticket="0" data-field="seat" placeholder="Seats, terminal..." /></div>
+        </div>
+        <label>Notes</label><textarea data-ticket="0" data-field="notes" rows="2" placeholder="Baggage, web check-in, coupon used..."></textarea>
+      </div>
+
+      <div class="ticket">
+        <div class="ticket-head">
+          <div><div class="route">🚆 New Delhi → Amritsar</div><div class="sub">12 Oct · 07:20 → 13:30</div></div>
+          <div class="amount" id="ticketAmt1">₹0</div>
+        </div>
+        <div class="grid2">
+          <div><label>Train / class</label><input data-ticket="1" data-field="carrier" value="12029 Swarn Shatabdi · CC" /></div>
+          <div><label>PNR</label><input data-ticket="1" data-field="pnr" placeholder="Enter PNR" /></div>
+          <div><label>Total ticket cost for 4 (₹)</label><input data-ticket="1" data-field="amount" type="number" min="0" inputmode="numeric" placeholder="0" /></div>
+          <div><label>Coach / seats</label><input data-ticket="1" data-field="seat" placeholder="Coach and seats" /></div>
+        </div>
+        <label>Notes</label><textarea data-ticket="1" data-field="notes" rows="2" placeholder="Boarding instructions, breakfast, etc."></textarea>
+      </div>
+
+      <div class="ticket">
+        <div class="ticket-head">
+          <div><div class="route">✈ Amritsar → Kochi</div><div class="sub">14 Oct · 08:20 departure</div></div>
+          <div class="amount" id="ticketAmt2">₹0</div>
+        </div>
+        <div class="grid2">
+          <div><label>Airline / flight no.</label><input data-ticket="2" data-field="carrier" placeholder="e.g. IndiGo 6E..." /></div>
+          <div><label>PNR / booking ref</label><input data-ticket="2" data-field="pnr" placeholder="Enter PNR" /></div>
+          <div><label>Total ticket cost for 4 (₹)</label><input data-ticket="2" data-field="amount" type="number" min="0" inputmode="numeric" placeholder="0" /></div>
+          <div><label>Seats / terminal</label><input data-ticket="2" data-field="seat" placeholder="Seats, terminal..." /></div>
+        </div>
+        <label>Notes</label><textarea data-ticket="2" data-field="notes" rows="2" placeholder="Connection, baggage, web check-in..."></textarea>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="expenses">
+    <div class="card">
+      <h2>Trip expense dashboard</h2>
+      <div class="summary">
+        <div class="box"><b id="spentTotal">₹0</b><span>Total spent / booked</span></div>
+        <div class="box"><b id="remainingBudget">₹1,50,000</b><span>Budget remaining</span></div>
+        <div class="box"><b id="ticketTotal">₹0</b><span>Ticket expenses</span></div>
+        <div class="box"><b id="otherTotal">₹33,258</b><span>Package + daily expenses</span></div>
+      </div>
+      <label>Overall trip budget for 4 (₹)</label>
+      <input id="budget" type="number" value="150000" min="0" inputmode="numeric" />
+      <div class="progress"><div id="budgetProgress"></div></div>
+    </div>
+
+    <div class="card">
+      <h3>Fixed / package costs</h3>
+      <div class="expense-row">
+        <div><strong>Panicker’s Travel quotation</strong><small>Transport + accommodation package quoted in itinerary</small></div>
+        <div><input id="agencyCost" type="number" value="33258" min="0" inputmode="numeric" style="width:115px;text-align:right" /></div>
+      </div>
+      <div class="note" style="margin-top:10px">Keep the package amount editable until the revised itinerary, Amritsar nights and GST breakup are reconfirmed.</div>
+    </div>
+
+    <div class="card">
+      <h3>Add daily expense</h3>
+      <form id="expenseForm">
+        <div class="grid2">
+          <div><label>Category</label><select id="expenseCategory"><option>Food</option><option>Local transport</option><option>Shopping</option><option>Entry tickets</option><option>Hotel</option><option>Other</option></select></div>
+          <div><label>Amount (₹)</label><input id="expenseAmount" type="number" min="1" required inputmode="numeric" /></div>
+        </div>
+        <label>Description</label><input id="expenseDesc" required placeholder="e.g. Andhra Bhavan lunch" />
+        <label>Date</label><select id="expenseDate"><option>10 Oct</option><option>11 Oct</option><option>12 Oct</option><option>13 Oct</option><option>14 Oct</option></select>
+        <div class="actions"><button class="btn" type="submit">Add expense</button></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3>Expense log</h3>
+      <div id="expenseList" class="muted">No daily expenses added yet.</div>
+      <div class="actions"><button id="clearExpenses" class="btn danger" type="button">Clear daily expenses</button></div>
+    </div>
+  </section>
+
+  <section class="section" id="reminders">
+    <div class="card">
+      <h2>Travel checklist</h2>
+      <div class="muted"><span id="checkCount">0/0</span> completed</div>
+      <div class="progress"><div id="checkProgress"></div></div>
+      <div id="checklist" style="margin-top:12px"></div>
+    </div>
+    <div class="card">
+      <h3>Add reminder</h3>
+      <form id="reminderForm">
+        <label>Reminder</label><input id="reminderText" required placeholder="e.g. Web check-in on 9 Oct" />
+        <div class="actions"><button class="btn" type="submit">Add reminder</button></div>
+      </form>
+    </div>
+  </section>
+
+  <section class="section" id="notes">
+    <div class="card">
+      <h2>Trip notes</h2>
+      <label>Hotel / driver details</label>
+      <textarea id="hotelNotes" rows="5" placeholder="Hotel confirmation, driver number, station pickup, room details..."></textarea>
+      <label>Food / shopping / places</label>
+      <textarea id="foodNotes" rows="5" placeholder="Andhra Bhavan, kulfi, Amritsar food stops, shopping ideas..."></textarea>
+      <label>General notes</label>
+      <textarea id="generalNotes" rows="6" placeholder="Anything else to remember..."></textarea>
+    </div>
+    <div class="card">
+      <h3>Backup your trip data</h3>
+      <p class="muted">Everything is saved in this browser on your phone. Export a backup before travel so you can restore it later if needed.</p>
+      <div class="actions">
+        <button id="exportBtn" class="btn" type="button">Export backup</button>
+        <label class="btn secondary" style="display:inline-flex;align-items:center">Import backup<input id="importFile" type="file" accept="application/json" style="display:none"></label>
+      </div>
+      <p id="backupStatus" class="muted"></p>
+    </div>
+  </section>
+
+  <p class="footer-note">Your trip data stays on your device. This static app does not send it to a server.</p>
+</div>
+
+<nav class="bottomnav" aria-label="Mobile navigation">
+  <button class="active" data-target="plan"><b>🗓️</b>Plan</button>
+  <button data-target="tickets"><b>🎫</b>Tickets</button>
+  <button data-target="expenses"><b>₹</b>Expenses</button>
+  <button data-target="reminders"><b>✓</b>Reminders</button>
+  <button data-target="notes"><b>📝</b>Notes</button>
+</nav>
+
+<script>
+(() => {
+  const KEY = "delhi_amritsar_trip_v1";
+  const defaultState = {
+    budget: 150000,
+    agencyCost: 33258,
+    tickets: [
+      {carrier:"",pnr:"",amount:0,seat:"",notes:""},
+      {carrier:"12029 Swarn Shatabdi · CC",pnr:"",amount:0,seat:"",notes:""},
+      {carrier:"",pnr:"",amount:0,seat:"",notes:""}
+    ],
+    expenses: [],
+    reminders: [
+      {text:"Keep offline copies of all flight and train tickets",done:false},
+      {text:"Confirm Delhi airport pickup and luggage drop",done:false},
+      {text:"Ask hotel for early check-in on 10 Oct",done:false},
+      {text:"Confirm revised Delhi sightseeing route",done:false},
+      {text:"Confirm 12 Oct early station drop",done:false},
+      {text:"Confirm Amritsar station pickup and hotel",done:false},
+      {text:"Ask Amritsar hotel for packed breakfast on 13 Oct night",done:false},
+      {text:"Complete web check-in for both flights",done:false},
+      {text:"Carry photo IDs, chargers, power bank and medicines",done:false},
+      {text:"Keep some cash for food, markets and small expenses",done:false},
+      {text:"Keep luggage compact for the car boot",done:false}
+    ],
+    hotelNotes:"",
+    foodNotes:"",
+    generalNotes:""
+  };
+
+  let state = load();
+  function load(){
+    try{
+      const raw = localStorage.getItem(KEY);
+      if(!raw) return structuredClone ? structuredClone(defaultState) : JSON.parse(JSON.stringify(defaultState));
+      const d = JSON.parse(raw);
+      return Object.assign(JSON.parse(JSON.stringify(defaultState)), d);
+    }catch(e){ return JSON.parse(JSON.stringify(defaultState)); }
+  }
+  function save(){ localStorage.setItem(KEY, JSON.stringify(state)); renderSummary(); }
+
+  const money = n => "₹" + (Number(n)||0).toLocaleString("en-IN");
+
+  function showSection(id){
+    document.querySelectorAll(".section").forEach(s=>s.classList.toggle("active", s.id===id));
+    document.querySelectorAll("[data-target]").forEach(b=>b.classList.toggle("active", b.dataset.target===id));
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+  document.querySelectorAll("[data-target]").forEach(b=>b.addEventListener("click",()=>showSection(b.dataset.target)));
+
+  function bindTickets(){
+    document.querySelectorAll("[data-ticket]").forEach(el=>{
+      const i=Number(el.dataset.ticket), f=el.dataset.field;
+      el.value = state.tickets[i]?.[f] ?? "";
+      el.addEventListener("input",()=>{
+        let v=el.value;
+        if(f==="amount") v=Math.max(0,Number(v)||0);
+        state.tickets[i][f]=v;
+        save();
+        document.getElementById("ticketAmt"+i).textContent=money(state.tickets[i].amount);
+      });
+    });
+    state.tickets.forEach((t,i)=>document.getElementById("ticketAmt"+i).textContent=money(t.amount));
+  }
+
+  const budgetEl=document.getElementById("budget"), agencyEl=document.getElementById("agencyCost");
+  budgetEl.value=state.budget; agencyEl.value=state.agencyCost;
+  budgetEl.addEventListener("input",()=>{state.budget=Math.max(0,Number(budgetEl.value)||0);save()});
+  agencyEl.addEventListener("input",()=>{state.agencyCost=Math.max(0,Number(agencyEl.value)||0);save()});
+
+  function renderExpenses(){
+    const list=document.getElementById("expenseList");
+    list.innerHTML="";
+    if(!state.expenses.length){ list.textContent="No daily expenses added yet."; list.className="muted"; return; }
+    list.className="";
+    state.expenses.forEach((e,i)=>{
+      const row=document.createElement("div");row.className="expense-row";
+      const left=document.createElement("div");
+      const strong=document.createElement("strong");strong.textContent=e.desc;
+      const small=document.createElement("small");small.textContent=e.date+" · "+e.category;
+      left.append(strong,small);
+      const right=document.createElement("div");right.style.textAlign="right";
+      const amt=document.createElement("div");amt.className="amount";amt.textContent=money(e.amount);
+      const rm=document.createElement("button");rm.type="button";rm.className="btn secondary";rm.style.cssText="padding:6px 9px;min-height:auto;margin-top:4px;font-size:11px";rm.textContent="Remove";
+      rm.addEventListener("click",()=>{state.expenses.splice(i,1);save();renderExpenses()});
+      right.append(amt,rm);row.append(left,right);list.append(row);
+    });
+  }
+  document.getElementById("expenseForm").addEventListener("submit",e=>{
+    e.preventDefault();
+    const amount=Math.max(0,Number(document.getElementById("expenseAmount").value)||0);
+    const desc=document.getElementById("expenseDesc").value.trim();
+    if(!amount||!desc) return;
+    state.expenses.push({
+      amount,
+      desc,
+      category:document.getElementById("expenseCategory").value,
+      date:document.getElementById("expenseDate").value
+    });
+    e.target.reset(); save(); renderExpenses();
+  });
+  document.getElementById("clearExpenses").addEventListener("click",()=>{
+    if(confirm("Clear all daily expenses?")){state.expenses=[];save();renderExpenses();}
+  });
+
+  function renderChecklist(){
+    const wrap=document.getElementById("checklist");wrap.innerHTML="";
+    state.reminders.forEach((r,i)=>{
+      const row=document.createElement("div");row.className="check";
+      const cb=document.createElement("input");cb.type="checkbox";cb.checked=!!r.done;
+      cb.addEventListener("change",()=>{state.reminders[i].done=cb.checked;save();renderChecklist()});
+      const text=document.createElement("div");text.style.flex="1";text.textContent=r.text;
+      const del=document.createElement("button");del.type="button";del.className="btn secondary";del.style.cssText="padding:5px 8px;min-height:auto;font-size:11px";del.textContent="Remove";
+      del.addEventListener("click",()=>{state.reminders.splice(i,1);save();renderChecklist()});
+      row.append(cb,text,del);wrap.append(row);
+    });
+    const done=state.reminders.filter(r=>r.done).length,total=state.reminders.length,pct=total?Math.round(done/total*100):0;
+    document.getElementById("checkCount").textContent=done+"/"+total;
+    document.getElementById("checkProgress").style.width=pct+"%";
+    document.getElementById("heroDone").textContent=pct+"%";
+  }
+  document.getElementById("reminderForm").addEventListener("submit",e=>{
+    e.preventDefault(); const t=document.getElementById("reminderText").value.trim(); if(!t)return;
+    state.reminders.push({text:t,done:false}); e.target.reset(); save(); renderChecklist();
+  });
+
+  ["hotelNotes","foodNotes","generalNotes"].forEach(id=>{
+    const el=document.getElementById(id); el.value=state[id]||"";
+    el.addEventListener("input",()=>{state[id]=el.value;save()});
+  });
+
+  function renderSummary(){
+    const tickets=state.tickets.reduce((s,t)=>s+(Number(t.amount)||0),0);
+    const daily=state.expenses.reduce((s,e)=>s+(Number(e.amount)||0),0);
+    const other=(Number(state.agencyCost)||0)+daily;
+    const spent=tickets+other;
+    document.getElementById("ticketTotal").textContent=money(tickets);
+    document.getElementById("otherTotal").textContent=money(other);
+    document.getElementById("spentTotal").textContent=money(spent);
+    document.getElementById("heroSpent").textContent=money(spent);
+    document.getElementById("remainingBudget").textContent=money(Math.max(0,(Number(state.budget)||0)-spent));
+    const pct=state.budget?Math.min(100,spent/state.budget*100):0;
+    document.getElementById("budgetProgress").style.width=pct+"%";
+  }
+
+  document.getElementById("exportBtn").addEventListener("click",()=>{
+    const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="delhi-amritsar-trip-backup.json";a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+    document.getElementById("backupStatus").textContent="Backup downloaded.";
+  });
+  document.getElementById("importFile").addEventListener("change",e=>{
+    const file=e.target.files?.[0]; if(!file)return;
+    const r=new FileReader();
+    r.onload=()=>{
+      try{
+        const d=JSON.parse(r.result); state=Object.assign(JSON.parse(JSON.stringify(defaultState)),d); save();
+        location.reload();
+      }catch(err){document.getElementById("backupStatus").textContent="Could not import this backup file.";}
+    };
+    r.readAsText(file);
+  });
+
+  bindTickets(); renderExpenses(); renderChecklist(); renderSummary();
+
+  if("serviceWorker" in navigator){
+    window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+  }
+})();
+</script>
+</body>
+</html>
