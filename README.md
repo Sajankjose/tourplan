@@ -1,4 +1,3 @@
-[README.md](https://github.com/user-attachments/files/31861614/README.md)
 # Delhi + Amritsar Trip Companion — v2
 
 Mobile-first GitHub Pages PWA for the 10–14 October 2026 family trip.
