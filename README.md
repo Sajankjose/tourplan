@@ -1,3 +1,4 @@
+[README.md](https://github.com/user-attachments/files/31861555/README.md)
 # Delhi + Amritsar Trip Companion
 
 Mobile-first static PWA for the 10–14 October 2026 Delhi + Amritsar family trip.
