@@ -1,454 +1,398 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/+esm";
 
-const cfg = window.TRIP_SUPABASE || {};
-const configured =
-  typeof cfg.url === "string" &&
-  typeof cfg.anonKey === "string" &&
+const cfg=window.TRIP_SUPABASE||{};
+const configured=
+  typeof cfg.url==="string" &&
+  typeof cfg.anonKey==="string" &&
   cfg.url.startsWith("https://") &&
   !cfg.url.includes("PASTE_") &&
-  cfg.anonKey.length > 20 &&
+  cfg.anonKey.length>20 &&
   !cfg.anonKey.includes("PASTE_");
 
-const $ = id => document.getElementById(id);
-const pill = $("cloudPill");
-const pillText = $("cloudPillText");
-const setupNotice = $("cloudSetupNotice");
-const signedOut = $("cloudSignedOut");
-const signedIn = $("cloudSignedIn");
-const authMsg = $("cloudAuthMsg");
-const syncMsg = $("cloudSyncMsg");
-const debugMsg = $("cloudDebugMsg");
-const userEl = $("cloudUser");
-const lastSyncEl = $("cloudLastSync");
+const $=id=>document.getElementById(id);
+const LOCAL_KEY="delhi_amritsar_trip_v1";
+const POLL_MS=8000;
 
-const LOCAL_KEY = "delhi_amritsar_trip_v1";
-const TRIP_SLUG = "delhi-amritsar-oct-2026";
-const POLL_MS = 12000;
+const pill=$("cloudPill"),pillText=$("cloudPillText");
+const setupNotice=$("cloudSetupNotice"),signedOut=$("cloudSignedOut"),signedIn=$("cloudSignedIn");
+const authMsg=$("cloudAuthMsg"),syncMsg=$("cloudSyncMsg"),debugMsg=$("cloudDebugMsg");
+const userEl=$("cloudUser"),lastSyncEl=$("cloudLastSync");
+const initPanel=$("cloudInitPanel"),readyActions=$("cloudReadyActions");
 
-function setPill(text, state=""){
-  if(pillText) pillText.textContent = text;
-  if(pill){
-    pill.classList.remove("online","offline");
-    if(state) pill.classList.add(state);
-  }
+function setPill(text,state=""){
+  if(pillText)pillText.textContent=text;
+  if(pill){pill.classList.remove("online","offline");if(state)pill.classList.add(state)}
 }
 function setMsg(el,text,kind=""){
-  if(!el) return;
-  el.textContent = text;
-  el.classList.remove("ok","warn");
-  if(kind) el.classList.add(kind);
+  if(!el)return;el.textContent=text;el.classList.remove("ok","warn");if(kind)el.classList.add(kind);
 }
 function fmt(iso){
-  if(!iso) return "Not yet";
-  const d = new Date(iso);
-  if(Number.isNaN(d.getTime())) return "Not yet";
+  if(!iso)return "Not synced";
+  const d=new Date(iso);
+  if(Number.isNaN(d.getTime()))return "Not synced";
   return d.toLocaleString("en-IN",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"});
 }
-function isoMs(iso){
-  const n = Date.parse(iso || "");
-  return Number.isFinite(n) ? n : 0;
-}
 function localState(){
-  if(window.tripApp?.getState) return window.tripApp.getState();
-  try { return JSON.parse(localStorage.getItem(LOCAL_KEY) || "{}"); }
-  catch { return {}; }
+  if(window.tripApp?.getState)return window.tripApp.getState();
+  try{return JSON.parse(localStorage.getItem(LOCAL_KEY)||"{}")}catch{return {}}
 }
-function meaningful(s){
-  if(!s || typeof s !== "object") return false;
-  const tickets=(s.tickets||[]).some(t=>t && (t.pnr || Number(t.amount)>0 || (t.carrier && !String(t.carrier).includes("12029"))));
-  const expenses=Array.isArray(s.expenses) && s.expenses.length>0;
-  const notes=["hotelNotes","foodNotes","generalNotes","delhiHotelAddress","amritsarHotelAddress"].some(k=>String(s[k]||"").trim());
-  return tickets || expenses || notes;
+function replaceLocal(data){
+  if(!data||typeof data!=="object")return;
+  if(window.tripApp?.replaceState)window.tripApp.replaceState(data);
+  else{localStorage.setItem(LOCAL_KEY,JSON.stringify(data));location.reload()}
 }
-function setLastSync(iso, version){
-  if(iso){
-    localStorage.setItem("trip_cloud_last_sync", iso);
-    localStorage.setItem("trip_cloud_last_seen_updated_at", iso);
+function getDeviceId(){
+  let id=localStorage.getItem("trip_v9_device_id");
+  if(!id){
+    id=(crypto.randomUUID?.()||("dev-"+Date.now()+"-"+Math.random().toString(36).slice(2)));
+    localStorage.setItem("trip_v9_device_id",id);
   }
-  if(version != null) localStorage.setItem("trip_cloud_last_seen_version", String(version));
-  if(lastSyncEl) lastSyncEl.textContent = fmt(iso);
-  setPill("Synced · " + fmt(iso), "online");
+  return id;
 }
-function markCloudCheck(text){
-  setMsg(debugMsg, text, "");
-}
+const deviceId=getDeviceId();
 
 if(!configured){
-  if(setupNotice) setupNotice.style.display="block";
-  if(signedOut) signedOut.style.display="none";
+  if(setupNotice)setupNotice.style.display="block";
+  if(signedOut)signedOut.style.display="none";
   setPill("Cloud not configured","offline");
-  markCloudCheck("Cloud sync is disabled until Supabase config is added.");
-} else {
-  const supabase = createClient(cfg.url, cfg.anonKey, {
-    auth:{persistSession:true, autoRefreshToken:true, detectSessionInUrl:true}
+  setMsg(debugMsg,"Add Supabase Project URL and publishable key.","warn");
+}else{
+  const supabase=createClient(cfg.url,cfg.anonKey,{
+    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
   });
 
-  let currentUser = null;
-  let tripId = localStorage.getItem("trip_cloud_trip_id") || "";
-  let syncing = false;
-  let pulling = false;
-  let pushDebounce = null;
-  let pollTimer = null;
+  let currentUser=null;
+  let currentVersion=0;
+  let lastCloudUpdatedAt="";
+  let initialized=false;
+  let pushing=false;
+  let applying=false;
+  let debounce=null;
+  let pollTimer=null;
+  let realtimeChannel=null;
 
-  async function ensureTrip(){
-    if(!currentUser) throw new Error("Not signed in");
-
-    if(tripId){
-      const {data,error} = await supabase.from("trips").select("id").eq("id",tripId).maybeSingle();
-      if(!error && data?.id) return tripId;
-      tripId="";
-      localStorage.removeItem("trip_cloud_trip_id");
-    }
-
-    const {data:existing,error:findErr} = await supabase
-      .from("trips")
-      .select("id")
-      .eq("owner_id", currentUser.id)
-      .eq("slug", TRIP_SLUG)
-      .maybeSingle();
-    if(findErr) throw findErr;
-
-    if(existing?.id){
-      tripId=existing.id;
-    } else {
-      const {data:created,error:createErr} = await supabase
-        .from("trips")
-        .insert({
-          owner_id: currentUser.id,
-          name:"Delhi + Amritsar",
-          slug:TRIP_SLUG,
-          start_date:"2026-10-10",
-          end_date:"2026-10-14"
-        })
-        .select("id")
-        .single();
-      if(createErr) throw createErr;
-      tripId=created.id;
-
-      const {error:memberErr} = await supabase.from("trip_members").upsert(
-        {trip_id:tripId,user_id:currentUser.id,role:"owner"},
-        {onConflict:"trip_id,user_id"}
-      );
-      if(memberErr) throw memberErr;
-    }
-
-    localStorage.setItem("trip_cloud_trip_id", tripId);
-    return tripId;
+  function showInitMode(){
+    initialized=false;
+    if(initPanel)initPanel.style.display="block";
+    if(readyActions)readyActions.style.display="none";
+    if(lastSyncEl)lastSyncEl.textContent="Not set up";
+    setPill("Cloud setup needed","online");
+    setMsg(syncMsg,"Choose the device that has the correct trip data, then use it as the master copy.","warn");
+  }
+  function showReady(){
+    initialized=true;
+    if(initPanel)initPanel.style.display="none";
+    if(readyActions)readyActions.style.display="flex";
+  }
+  function rememberCloud(row){
+    currentVersion=Number(row?.version)||0;
+    lastCloudUpdatedAt=row?.updated_at||"";
+    localStorage.setItem("trip_v9_cloud_version",String(currentVersion));
+    if(lastCloudUpdatedAt)localStorage.setItem("trip_v9_cloud_updated_at",lastCloudUpdatedAt);
+    if(lastSyncEl)lastSyncEl.textContent=fmt(lastCloudUpdatedAt);
+    if(lastCloudUpdatedAt)setPill("Synced · "+fmt(lastCloudUpdatedAt),"online");
+  }
+  function debug(text){
+    setMsg(debugMsg,`Device ${deviceId.slice(0,8)} · user ${currentUser?.id?.slice(0,8)||"—"} · cloud v${currentVersion} · ${text}`,"");
   }
 
   async function getCloud(){
-    const id = await ensureTrip();
-    const {data,error} = await supabase
-      .from("trip_state")
-      .select("data,updated_at,version,updated_by")
-      .eq("trip_id",id)
+    if(!currentUser)throw new Error("Not signed in");
+    const {data,error}=await supabase
+      .from("user_trip_state")
+      .select("data,version,device_id,updated_at")
+      .eq("user_id",currentUser.id)
       .maybeSingle();
-    if(error) throw error;
-    return data || null;
+    if(error)throw error;
+    return data||null;
   }
 
-  async function pushCloud({explicit=false}={}){
-    if(!currentUser || syncing || pulling || !navigator.onLine) return;
-    syncing=true;
+  async function initializeFromThisDevice(){
+    if(!currentUser||pushing)return;
+    pushing=true;
     try{
-      setPill("Syncing…","");
-      setMsg(syncMsg,"Saving this device to cloud…","");
-      const id = await ensureTrip();
-      const state = localState();
+      setPill("Creating cloud copy…","");
+      setMsg(syncMsg,"Uploading this device as the master copy…","");
+      const state=localState();
+      const {data,error}=await supabase.from("user_trip_state").upsert({
+        user_id:currentUser.id,
+        data:state,
+        version:1,
+        device_id:deviceId
+      },{onConflict:"user_id"}).select("data,version,device_id,updated_at").single();
+      if(error)throw error;
+      rememberCloud(data);
+      showReady();
+      setMsg(syncMsg,"✓ Cloud copy created. Live sync is on.","ok");
+      debug("initialized from this device");
+      subscribeRealtime();
+    }catch(err){
+      console.error("initialize cloud",err);
+      setPill("Sync error","offline");
+      setMsg(syncMsg,"Could not create cloud copy: "+(err.message||"Unknown error"),"warn");
+      debug("initialize failed");
+    }finally{pushing=false}
+  }
 
-      const {data:existing,error:readErr} = await supabase
-        .from("trip_state")
-        .select("version,updated_at")
-        .eq("trip_id",id)
-        .maybeSingle();
-      if(readErr) throw readErr;
-
-      // Protect against silently overwriting a newer cloud copy.
-      const seen = isoMs(localStorage.getItem("trip_cloud_last_seen_updated_at"));
-      const remote = isoMs(existing?.updated_at);
-      if(existing && remote > seen + 500){
-        setMsg(syncMsg,"A newer cloud copy was found. Refreshing before saving…","warn");
-        syncing=false;
-        await pullIfNewer({force:true, reload:true});
+  async function pushLocal({manual=false}={}){
+    if(!currentUser||!initialized||pushing||applying||!navigator.onLine)return;
+    pushing=true;
+    try{
+      if(manual)setPill("Syncing…","");
+      const remote=await getCloud();
+      if(!remote){
+        showInitMode();
         return;
       }
 
-      const nextVersion = (Number(existing?.version)||0)+1;
-      const {data,error} = await supabase.from("trip_state").upsert({
-        trip_id:id,
-        data:state,
-        version:nextVersion,
-        updated_by:currentUser.id
-      },{onConflict:"trip_id"}).select("updated_at,version").single();
-      if(error) throw error;
+      // If another device changed the cloud since this device last saw it,
+      // pull first rather than blindly overwriting it.
+      if((Number(remote.version)||0)>currentVersion && remote.device_id!==deviceId){
+        rememberCloud(remote);
+        setMsg(syncMsg,"Newer data found on another device. Updating this device…","ok");
+        applying=true;
+        replaceLocal(remote.data);
+        return;
+      }
 
-      localStorage.setItem("trip_cloud_initialized","1");
-      setLastSync(data.updated_at, data.version);
-      setMsg(syncMsg,(explicit?"✓ Synced now":"✓ Synced")+" · "+fmt(data.updated_at),"ok");
-      markCloudCheck("Cloud version "+data.version+" · checked "+fmt(new Date().toISOString()));
+      const nextVersion=(Number(remote.version)||0)+1;
+      const {data,error}=await supabase
+        .from("user_trip_state")
+        .update({
+          data:localState(),
+          version:nextVersion,
+          device_id:deviceId
+        })
+        .eq("user_id",currentUser.id)
+        .eq("version",Number(remote.version)||0)
+        .select("data,version,device_id,updated_at")
+        .maybeSingle();
+
+      if(error)throw error;
+      if(!data){
+        // Optimistic lock lost: another device updated first.
+        const latest=await getCloud();
+        if(latest){
+          rememberCloud(latest);
+          applying=true;
+          setMsg(syncMsg,"Another device updated first. Loading the newer copy…","ok");
+          replaceLocal(latest.data);
+        }
+        return;
+      }
+
+      rememberCloud(data);
+      setMsg(syncMsg,manual?"✓ Synced now":"✓ Live sync on","ok");
+      debug("last write from this device");
     }catch(err){
-      console.error("pushCloud",err);
+      console.error("push",err);
       setPill("Sync error","offline");
       setMsg(syncMsg,"Could not sync: "+(err.message||"Unknown error"),"warn");
-      markCloudCheck("Push failed. Check Supabase tables/RLS and network.");
+      debug("push failed");
     }finally{
-      syncing=false;
+      pushing=false;
+      applying=false;
     }
   }
 
-  async function applyCloud(row,{reload=true}={}){
-    if(!row?.data) return false;
-    pulling=true;
+  async function pullCloud({force=false}={}){
+    if(!currentUser||pushing||applying||!navigator.onLine)return false;
     try{
-      localStorage.setItem("trip_cloud_initialized","1");
-      setLastSync(row.updated_at, row.version);
-      setMsg(syncMsg,"✓ Newer cloud data received · "+fmt(row.updated_at),"ok");
-      markCloudCheck("Cloud version "+row.version+" loaded.");
-      if(window.tripApp?.replaceState && reload){
-        window.tripApp.replaceState(row.data);
-      }else{
-        localStorage.setItem(LOCAL_KEY, JSON.stringify(row.data));
-        if(reload) location.reload();
-      }
-      return true;
-    }finally{
-      // If replaceState reloads the page this is moot, but keep state correct when reload=false.
-      pulling=false;
-    }
-  }
+      const row=await getCloud();
+      if(!row){showInitMode();debug("no user_trip_state row");return false}
+      showReady();
 
-  async function pullIfNewer({force=false,reload=true}={}){
-    if(!currentUser || pulling || syncing || !navigator.onLine) return false;
-    pulling=true;
-    try{
-      setPill(force?"Refreshing…":"Checking cloud…","");
-      const row = await getCloud();
+      const remoteVersion=Number(row.version)||0;
+      const isNew=force || remoteVersion>currentVersion;
 
-      if(!row?.data){
-        setPill("Signed in","online");
-        setMsg(syncMsg,"No cloud copy exists yet. Upload this device first.","warn");
-        markCloudCheck("Cloud checked: no trip_state row yet.");
-        return false;
+      if(isNew){
+        rememberCloud(row);
+        // Ignore our own realtime echo if local version is already current.
+        if(row.device_id===deviceId && !force){
+          setMsg(syncMsg,"✓ Live sync on","ok");
+          debug("own cloud update observed");
+          return false;
+        }
+        applying=true;
+        setMsg(syncMsg,"New cloud data received. Updating…","ok");
+        debug("loading remote update");
+        replaceLocal(row.data);
+        return true;
       }
 
-      const cloudMs = isoMs(row.updated_at);
-      const seenMs = isoMs(localStorage.getItem("trip_cloud_last_seen_updated_at"));
-      const cloudVersion = Number(row.version)||0;
-      const seenVersion = Number(localStorage.getItem("trip_cloud_last_seen_version")||0);
-
-      markCloudCheck("Cloud v"+cloudVersion+" checked "+fmt(new Date().toISOString()));
-
-      if(force || cloudVersion > seenVersion || cloudMs > seenMs + 500){
-        pulling=false; // applyCloud manages it again
-        return await applyCloud(row,{reload});
-      }
-
-      setLastSync(row.updated_at,row.version);
-      setMsg(syncMsg,"✓ Up to date · cloud checked just now","ok");
+      rememberCloud(row);
+      setMsg(syncMsg,"✓ Live sync on","ok");
+      debug("up to date");
       return false;
     }catch(err){
-      console.error("pullIfNewer",err);
+      console.error("pull",err);
       setPill("Sync error","offline");
       setMsg(syncMsg,"Could not check cloud: "+(err.message||"Unknown error"),"warn");
-      markCloudCheck("Cloud check failed.");
+      debug("pull failed");
       return false;
-    }finally{
-      pulling=false;
-    }
+    }finally{applying=false}
   }
 
-  async function firstSync(){
-    const row = await getCloud();
-    const local = localState();
-
-    if(!row?.data){
-      await pushCloud({explicit:true});
-      return;
-    }
-
-    const initialized = localStorage.getItem("trip_cloud_initialized")==="1";
-    if(!initialized){
-      if(meaningful(local)){
-        // First time on a device with local data: don't guess which copy wins.
-        setPill("Choose sync copy","online");
-        setMsg(syncMsg,"This device and the cloud both contain trip data. Choose “Refresh from cloud” or “Upload this device”.","warn");
-        markCloudCheck("Cloud v"+row.version+" found. Waiting for your choice.");
-      }else{
-        await applyCloud(row,{reload:true});
-      }
-      return;
-    }
-
-    // Important v5 change: initialized devices ALWAYS compare with cloud on startup.
-    localStorage.setItem("trip_cloud_last_seen_updated_at",
-      localStorage.getItem("trip_cloud_last_seen_updated_at") || "1970-01-01T00:00:00Z"
-    );
-    await pullIfNewer({force:false,reload:true});
-  }
-
-  function renderAuth(user){
-    currentUser=user||null;
-    if(user){
-      if(signedOut) signedOut.style.display="none";
-      if(signedIn) signedIn.style.display="block";
-      if(userEl) userEl.textContent=user.email||"Signed in";
-      const last=localStorage.getItem("trip_cloud_last_sync");
-      if(lastSyncEl) lastSyncEl.textContent=fmt(last);
-      setPill(navigator.onLine ? (last ? "Synced · "+fmt(last) : "Signed in") : "Offline",
-              navigator.onLine?"online":"offline");
-    } else {
-      if(signedOut) signedOut.style.display="block";
-      if(signedIn) signedIn.style.display="none";
-      setPill("Local only","");
-      markCloudCheck("Sign in with your email and password to enable multi-device sync.");
-    }
+  function subscribeRealtime(){
+    if(!currentUser||realtimeChannel)return;
+    realtimeChannel=supabase
+      .channel("trip-v9-"+currentUser.id)
+      .on("postgres_changes",{
+        event:"*",
+        schema:"public",
+        table:"user_trip_state",
+        filter:`user_id=eq.${currentUser.id}`
+      },payload=>{
+        const row=payload.new;
+        if(!row)return;
+        const remoteVersion=Number(row.version)||0;
+        if(remoteVersion<=currentVersion)return;
+        rememberCloud(row);
+        if(row.device_id===deviceId){
+          setMsg(syncMsg,"✓ Live sync on","ok");
+          debug("realtime own write");
+          return;
+        }
+        applying=true;
+        setMsg(syncMsg,"Update received from another device…","ok");
+        debug("realtime remote write");
+        replaceLocal(row.data);
+      })
+      .subscribe(status=>{
+        if(status==="SUBSCRIBED")debug("realtime connected");
+      });
   }
 
   function startPolling(){
-    if(pollTimer) clearInterval(pollTimer);
+    if(pollTimer)clearInterval(pollTimer);
     pollTimer=setInterval(()=>{
-      if(currentUser && navigator.onLine && document.visibilityState==="visible"){
-        pullIfNewer({force:false,reload:true});
+      if(currentUser&&initialized&&navigator.onLine&&document.visibilityState==="visible"){
+        pullCloud({force:false});
       }
     },POLL_MS);
   }
 
+  async function bootSignedIn(user){
+    currentUser=user;
+    if(userEl)userEl.textContent=user.email||"Signed in";
+    if(signedOut)signedOut.style.display="none";
+    if(signedIn)signedIn.style.display="block";
+    setPill("Checking cloud…","online");
+
+    const row=await getCloud();
+    if(!row){
+      showInitMode();
+      debug("no v9 cloud row");
+      return;
+    }
+
+    rememberCloud(row);
+    showReady();
+    setMsg(syncMsg,"✓ Live sync on","ok");
+    debug("cloud row found");
+
+    // Cloud is the shared source of truth after initialization.
+    applying=true;
+    replaceLocal(row.data);
+  }
+
+  function renderSignedOut(){
+    currentUser=null;
+    initialized=false;
+    currentVersion=0;
+    lastCloudUpdatedAt="";
+    if(signedOut)signedOut.style.display="block";
+    if(signedIn)signedIn.style.display="none";
+    setPill("Local only","");
+  }
+
   $("togglePasswordBtn")?.addEventListener("click",()=>{
-    const input=$("cloudPassword");
-    const btn=$("togglePasswordBtn");
+    const input=$("cloudPassword"),btn=$("togglePasswordBtn");
     if(!input||!btn)return;
-    const showing=input.type==="text";
-    input.type=showing?"password":"text";
-    btn.textContent=showing?"Show":"Hide";
+    const show=input.type==="password";
+    input.type=show?"text":"password";
+    btn.textContent=show?"Hide":"Show";
   });
 
   async function passwordLogin(){
     const email=String($("cloudEmail")?.value||"").trim();
     const password=String($("cloudPassword")?.value||"");
-    if(!email){
-      setMsg(authMsg,"Enter your email address.","warn");
-      return;
-    }
-    if(!password){
-      setMsg(authMsg,"Enter your password.","warn");
-      return;
-    }
-
+    if(!email){setMsg(authMsg,"Enter your email address.","warn");return}
+    if(!password){setMsg(authMsg,"Enter your password.","warn");return}
     const btn=$("cloudLoginBtn");
-    if(btn){btn.disabled=true;btn.textContent="Signing in…";}
-    setMsg(authMsg,"Signing in…","");
-
+    if(btn){btn.disabled=true;btn.textContent="Signing in…"}
     try{
       const {data,error}=await supabase.auth.signInWithPassword({email,password});
       if(error){
-        const msg=String(error.message||"");
-        if(msg.toLowerCase().includes("invalid login credentials")){
-          setMsg(authMsg,"Incorrect email or password.","warn");
-        }else if(msg.toLowerCase().includes("email not confirmed")){
-          setMsg(authMsg,"This user is not confirmed in Supabase. Confirm the user in Authentication → Users.","warn");
-        }else{
-          setMsg(authMsg,"Could not sign in: "+msg,"warn");
-        }
-        return;
-      }
-
-      if(data?.user){
+        const m=String(error.message||"");
+        setMsg(authMsg,m.toLowerCase().includes("invalid login")?"Incorrect email or password.":"Could not sign in: "+m,"warn");
+      }else if(data?.user){
         setMsg(authMsg,"✓ Signed in.","ok");
       }
     }catch(err){
-      console.error("password login",err);
-      setMsg(authMsg,"Could not sign in. Check your connection and Supabase configuration.","warn");
+      setMsg(authMsg,"Could not sign in. Check the connection.","warn");
     }finally{
-      if(btn){btn.disabled=false;btn.textContent="Sign in";}
+      if(btn){btn.disabled=false;btn.textContent="Sign in"}
     }
   }
-
   $("cloudLoginBtn")?.addEventListener("click",passwordLogin);
-  $("cloudPassword")?.addEventListener("keydown",e=>{
-    if(e.key==="Enter") passwordLogin();
-  });
+  $("cloudPassword")?.addEventListener("keydown",e=>{if(e.key==="Enter")passwordLogin()});
 
-  $("cloudLogoutBtn")?.addEventListener("click",async()=>{
-    await supabase.auth.signOut();
-    currentUser=null;
-    if(pollTimer) clearInterval(pollTimer);
-    renderAuth(null);
+  $("cloudInitBtn")?.addEventListener("click",()=>{
+    if(confirm("Use the trip data currently on this device as the new cloud master copy?")){
+      initializeFromThisDevice();
+    }
   });
-
   $("cloudSyncBtn")?.addEventListener("click",async()=>{
-    // Manual "Sync now" first checks if remote is newer, then pushes if not.
-    const changed=await pullIfNewer({force:false,reload:true});
-    if(!changed) await pushCloud({explicit:true});
+    await pullCloud({force:false});
+    await pushLocal({manual:true});
   });
-
-  $("cloudPushBtn")?.addEventListener("click",async()=>{
-    // Explicit override intentionally uploads local state.
-    const id=await ensureTrip();
-    const state=localState();
-    const {data:existing,error:readErr}=await supabase.from("trip_state").select("version").eq("trip_id",id).maybeSingle();
-    if(readErr){setMsg(syncMsg,"Could not read cloud: "+readErr.message,"warn");return}
-    const nextVersion=(Number(existing?.version)||0)+1;
-    const {data,error}=await supabase.from("trip_state").upsert({
-      trip_id:id,data:state,version:nextVersion,updated_by:currentUser.id
-    },{onConflict:"trip_id"}).select("updated_at,version").single();
-    if(error){setMsg(syncMsg,"Upload failed: "+error.message,"warn");return}
-    localStorage.setItem("trip_cloud_initialized","1");
-    setLastSync(data.updated_at,data.version);
-    setMsg(syncMsg,"✓ This device uploaded · "+fmt(data.updated_at),"ok");
-    markCloudCheck("Cloud v"+data.version+" updated from this device.");
-  });
-
-  $("cloudPullBtn")?.addEventListener("click",async()=>{
-    await pullIfNewer({force:true,reload:true});
+  $("cloudLogoutBtn")?.addEventListener("click",async()=>{
+    if(realtimeChannel){await supabase.removeChannel(realtimeChannel);realtimeChannel=null}
+    if(pollTimer){clearInterval(pollTimer);pollTimer=null}
+    await supabase.auth.signOut();
+    renderSignedOut();
   });
 
   window.addEventListener("trip:local-save",()=>{
-    if(!currentUser || !navigator.onLine) return;
-    clearTimeout(pushDebounce);
+    if(!currentUser||!initialized||applying||!navigator.onLine)return;
+    clearTimeout(debounce);
     setPill("Saving…","");
-    pushDebounce=setTimeout(()=>pushCloud(),900);
+    debounce=setTimeout(()=>pushLocal(),700);
   });
 
-  window.addEventListener("online",()=>{
-    if(currentUser){
-      setPill("Online · checking","online");
-      pullIfNewer({force:false,reload:true});
-    }
-  });
-  window.addEventListener("offline",()=>{
-    if(currentUser) setPill("Offline","offline");
-  });
-  window.addEventListener("focus",()=>{
-    if(currentUser && navigator.onLine) pullIfNewer({force:false,reload:true});
-  });
+  window.addEventListener("focus",()=>{if(currentUser&&initialized&&navigator.onLine)pullCloud()});
   document.addEventListener("visibilitychange",()=>{
-    if(document.visibilityState==="visible" && currentUser && navigator.onLine){
-      pullIfNewer({force:false,reload:true});
-    }
+    if(document.visibilityState==="visible"&&currentUser&&initialized&&navigator.onLine)pullCloud();
   });
+  window.addEventListener("online",()=>{
+    if(currentUser&&initialized){setPill("Online · checking","online");pullCloud()}
+  });
+  window.addEventListener("offline",()=>{if(currentUser)setPill("Offline","offline")});
 
   const {data:{session}}=await supabase.auth.getSession();
-  renderAuth(session?.user||null);
   if(session?.user){
     try{
-      await firstSync();
+      await bootSignedIn(session.user);
+      subscribeRealtime();
       startPolling();
     }catch(err){
-      console.error("firstSync",err);
-      setPill("Sync error","offline");
+      console.error("boot",err);
+      setPill("Sync setup error","offline");
       setMsg(syncMsg,"Cloud setup error: "+(err.message||"Unknown error"),"warn");
-      markCloudCheck("Initial cloud check failed.");
+      setMsg(debugMsg,"Run supabase-v9-migration.sql, then reload.","warn");
     }
-  }
+  }else renderSignedOut();
 
-  supabase.auth.onAuthStateChange(async(_event,session)=>{
-    renderAuth(session?.user||null);
-    if(session?.user){
+  supabase.auth.onAuthStateChange(async(event,session)=>{
+    if(event==="SIGNED_OUT"){renderSignedOut();return}
+    if(session?.user && (!currentUser || currentUser.id!==session.user.id)){
       try{
-        await firstSync();
+        await bootSignedIn(session.user);
+        subscribeRealtime();
         startPolling();
       }catch(err){
-        console.error("auth sync",err);
+        console.error("auth boot",err);
         setMsg(syncMsg,"Cloud setup error: "+(err.message||"Unknown error"),"warn");
       }
     }

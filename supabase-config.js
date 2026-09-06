@@ -1,5 +1,5 @@
 // Public browser config. Never put a service_role key here.
 window.TRIP_SUPABASE = {
-  url: "https://odeyfwcsucaotixkvrfj.supabase.co",
-  anonKey: "sb_publishable_ehpLtOpwNHUZQyNTKw3RpA_PTl0O_es"
+  url: "PASTE_YOUR_SUPABASE_PROJECT_URL",
+  anonKey: "PASTE_YOUR_SUPABASE_ANON_KEY"
 };
