@@ -1,62 +1,43 @@
-# Delhi + Amritsar Trip Companion — v3
+# Delhi + Amritsar Trip Companion — v4 Cloud Sync
 
-Mobile-first GitHub Pages PWA for the 10–14 October 2026 family trip.
+This version adds multi-device Supabase cloud sync while retaining the existing mobile PWA, itinerary, tickets, ticket expenses, maps, Hindi helper, reminders, notes, and local/offline storage.
 
-## New in v3
-- Explicit **Save Ticket Details** button on each booked ticket.
-- Clear status such as **Saved on this device** with date/time.
-- Autosave remains active while you type.
-- **Save All Trip Data** button under More → Trip details.
-- Global last-saved confirmation.
-- Same browser storage key as v1/v2, so existing data is preserved on the same site/browser.
+## Setup
+1. Create a Supabase project.
+2. Open Supabase SQL Editor and run `supabase-schema.sql`.
+3. In Supabase Authentication, enable Email sign-in.
+4. Under Authentication → URL Configuration, set your GitHub Pages URL as the Site URL and add it to Redirect URLs.
+5. Open `supabase-config.js` and paste your Supabase Project URL and anon/public key.
+6. Upload all v4 files to the same GitHub Pages repository.
 
-## New in v2
-- **Today screen**: automatically previews the relevant trip day and next important step.
-- **Map Help**: day-wise stops, full routes, and "Directions" buttons that open Google Maps.
-- **Hindi Travel Helper**: offline phrasebook for taxi, hotel, railway, food, shopping, and help.
-- **Show Large** mode: display the Hindi sentence clearly to another person.
-- **Speak Hindi**: uses the phone/browser speech engine when a Hindi voice is available.
-- **Trip details**: save final Delhi/Amritsar hotel addresses and driver numbers.
-- **Reminders with optional date/time**.
-- Existing ticket, expense, package cost, notes, backup and offline support retained.
+Example GitHub Pages URL:
+`https://YOUR-USERNAME.github.io/delhi-amritsar-trip/`
 
-## Existing saved data
-The app intentionally keeps the same browser storage key as v1 (`delhi_amritsar_trip_v1`).
-If you update the same GitHub Pages site and use the same browser, your previously entered ticket/expense data should continue to load.
+## Important security
+The anon/public key is safe in a browser app only because Row Level Security is enabled by `supabase-schema.sql`.
 
-Still, **export a backup before replacing the old app**.
+Never put the `service_role` key in GitHub or in this frontend.
 
-## Publish / update on GitHub Pages
-If this is a new repo:
-1. Create a GitHub repository, for example `delhi-amritsar-trip`.
-2. Upload all files from this folder to the repository root.
-3. Go to **Settings → Pages**.
-4. Select **Deploy from a branch** → `main` → `/root`.
-5. Save.
+Do not store Aadhaar/PAN numbers, passwords, OTPs, card numbers, CVV, or banking credentials.
 
-If you already published v1:
-1. Open the existing repository.
-2. Replace `index.html`, `sw.js`, `manifest.webmanifest`, `icon.svg`, and `README.md` with these v2 files.
-3. Keep `.nojekyll`.
-4. Commit the changes.
-5. GitHub Pages will redeploy automatically.
-6. If your phone still shows the older app, close/reopen it or refresh once; v2 uses a new service-worker cache.
+## Existing v3 data
+v4 keeps the same local storage key (`delhi_amritsar_trip_v1`), so data already entered on the same browser should remain.
 
-## Install on phone
-- Android/Chrome: open the GitHub Pages URL → menu → **Install app / Add to Home screen**.
-- iPhone/Safari: open URL → Share → **Add to Home Screen**.
+Export a backup before updating the site anyway.
 
-## Storage & privacy
-- Ticket details, PNRs, expenses, notes, hotel addresses, and reminders are stored in the browser's `localStorage`.
-- They are **not synced to a server**.
-- They will not automatically appear on another phone/browser.
-- Do not store Aadhaar/PAN numbers, payment card details, CVV, passwords, or OTPs.
-- Export a backup before the trip and keep that JSON file private.
+## First sync
+Open More → Cloud sync → enter your email → open the sign-in link from Supabase.
 
-## Maps
-Map buttons open Google Maps using standard Google Maps URLs. No paid Maps API key is required.
-For best directions, enter your exact final hotel addresses under **More → Trip details**.
+If no cloud copy exists, the app uploads your current local trip.
 
-## Offline
-The app shell, itinerary, Hindi helper, expenses, reminders and notes work offline after the first load.
-Google Maps itself requires the Maps app / network data unless you separately download offline maps in Google Maps.
+If both cloud and device contain data, you can choose:
+- Use cloud copy
+- Upload this device
+
+After that, changes autosync after local saves.
+
+## Second phone / laptop
+Open the same GitHub Pages URL and sign in with the same email. Use the cloud copy to get the same trip data.
+
+## Current v4 scope
+For reliable migration from v3, the complete app state is stored in Supabase as JSONB (`trip_state`). `trips` and `trip_members` are already included for the next step: family sharing with owner/editor/viewer access.

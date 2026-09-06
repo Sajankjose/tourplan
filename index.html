@@ -93,6 +93,8 @@
     .more-card b{display:block;font-size:15px;margin-bottom:4px}.more-card span{font-size:12px;color:var(--muted)}
     .save-status{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;min-height:24px}.save-status.saved{color:var(--accent);font-weight:700}.save-status.pending{color:var(--warn)}
 .save-dot{width:8px;height:8px;border-radius:50%;background:#d1d5db;display:inline-block}.save-status.saved .save-dot{background:var(--accent)}.save-status.pending .save-dot{background:#f59e0b}
+.cloud-pill{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:7px 10px;border-radius:999px;font-size:11px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);color:#dbe4ee}.cloud-dot{width:8px;height:8px;border-radius:50%;background:#f59e0b}.cloud-pill.online .cloud-dot{background:#6ee7b7}.cloud-pill.offline .cloud-dot{background:#fca5a5}
+.cloud-panel{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fcfcfd;margin-top:10px}.cloud-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.cloud-msg{font-size:12px;color:var(--muted);margin-top:8px}.cloud-msg.ok{color:var(--accent);font-weight:700}.cloud-msg.warn{color:var(--warn)}
 .footer-note{font-size:11px;color:var(--muted);text-align:center;margin-top:18px}
     .bottomnav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);z-index:50;padding-bottom:env(safe-area-inset-bottom)}
     .bottomnav button{border:0;background:transparent;padding:9px 3px 8px;color:var(--muted);font-size:11px;min-height:55px}.bottomnav button b{display:block;font-size:17px;margin-bottom:2px}.bottomnav button.active{color:var(--accent)}
@@ -110,6 +112,7 @@
     <div class="eyebrow">Family trip · 4 travellers</div>
     <h1>Delhi + Amritsar</h1>
     <p>10–14 October 2026 · your pocket travel companion</p>
+    <div id="cloudPill" class="cloud-pill"><span class="cloud-dot"></span><span id="cloudPillText">Local only</span></div>
     <div class="hero-grid">
       <div class="hero-stat"><b id="heroCountdown">—</b><span>Trip status</span></div>
       <div class="hero-stat"><b id="heroSpent">₹0</b><span>Total booked/spent</span></div>
@@ -373,6 +376,32 @@
         <button class="more-card" data-go="reminders"><b>✓ Reminders</b><span>Checklist and due times</span></button>
         <button class="more-card" data-go="notes"><b>📝 Trip details</b><span>Hotels, drivers, notes and backup</span></button>
       </div>
+      <div class="cloud-panel">
+        <div class="route">☁️ Cloud sync</div>
+        <div class="sub">Use the same email on another phone or computer to access the same trip.</div>
+        <div id="cloudSetupNotice" class="note" style="margin-top:10px;display:none">
+          Supabase is not configured yet. Add your Project URL and anon key in <b>supabase-config.js</b>.
+        </div>
+        <div id="cloudSignedOut">
+          <label>Email address</label>
+          <input id="cloudEmail" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com">
+          <div class="cloud-actions"><button id="cloudLoginBtn" class="btn" type="button">Email me a sign-in link</button></div>
+          <div id="cloudAuthMsg" class="cloud-msg">No password is stored in this app.</div>
+        </div>
+        <div id="cloudSignedIn" style="display:none">
+          <div class="summary">
+            <div class="box"><b id="cloudUser">—</b><span>Signed in</span></div>
+            <div class="box"><b id="cloudLastSync">—</b><span>Last cloud sync</span></div>
+          </div>
+          <div class="cloud-actions">
+            <button id="cloudSyncBtn" class="btn" type="button">Sync now</button>
+            <button id="cloudPullBtn" class="btn secondary" type="button">Use cloud copy</button>
+            <button id="cloudPushBtn" class="btn secondary" type="button">Upload this device</button>
+            <button id="cloudLogoutBtn" class="btn danger" type="button">Sign out</button>
+          </div>
+          <div id="cloudSyncMsg" class="cloud-msg">Changes autosync after local save.</div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -387,6 +416,8 @@
   <button data-target="more"><b>•••</b>More</button>
 </nav>
 
+<script src="./supabase-config.js"></script>
+<script type="module" src="./cloud-sync.js"></script>
 <script>
 (() => {
   const KEY="delhi_amritsar_trip_v1"; // same key as v1: preserves existing saved data
@@ -431,7 +462,11 @@
     }catch(e){return clone(defaults)}
   }
   let state=load();
-  const save=()=>{localStorage.setItem(KEY,JSON.stringify(state));renderSummary();renderToday()};
+  const save=()=>{
+    localStorage.setItem(KEY,JSON.stringify(state));
+    renderSummary();renderToday();
+    window.dispatchEvent(new CustomEvent("trip:local-save",{detail:{state:clone(state)}}));
+  };
   const money=n=>"₹"+(Number(n)||0).toLocaleString("en-IN");
   const enc=s=>encodeURIComponent(s);
   const mapSearch=q=>"https://www.google.com/maps/search/?api=1&query="+enc(q);
@@ -544,6 +579,7 @@
         });
         state.ticketSavedAt[i]=new Date().toISOString();
         localStorage.setItem(KEY,JSON.stringify(state));
+        window.dispatchEvent(new CustomEvent("trip:local-save",{detail:{state:clone(state)}}));
         renderSummary();
         setSaveStatus("ticketSaveStatus"+i,"✓ Saved on this device · "+formatSavedTime(state.ticketSavedAt[i]),"saved");
       });
@@ -730,6 +766,7 @@
     // All fields already autosave; this provides an explicit checkpoint and confirmation.
     state.globalSavedAt=new Date().toISOString();
     localStorage.setItem(KEY,JSON.stringify(state));
+    window.dispatchEvent(new CustomEvent("trip:local-save",{detail:{state:clone(state)}}));
     renderSummary();
     setSaveStatus("globalSaveStatus","✓ All trip data saved · "+formatSavedTime(state.globalSavedAt),"saved");
   });
@@ -745,7 +782,23 @@
     r.readAsText(file);
   });
 
-  bindTickets();renderExpenses();renderChecklist();renderSummary();renderToday();renderPhrases();renderMaps();refreshSaveStatuses();
+  window.tripApp={
+    storageKey:KEY,
+    getState:()=>clone(state),
+    replaceState:(incoming)=>{
+      if(!incoming||typeof incoming!=="object")return false;
+      state=Object.assign(clone(defaults),incoming);
+      state.tickets=defaults.tickets.map((t,i)=>Object.assign({},t,(incoming.tickets||[])[i]||{}));
+      state.reminders=Array.isArray(incoming.reminders)?incoming.reminders:clone(defaults.reminders);
+      state.expenses=Array.isArray(incoming.expenses)?incoming.expenses:[];
+      localStorage.setItem(KEY,JSON.stringify(state));
+      location.reload();
+      return true;
+    },
+    saveLocal:()=>{localStorage.setItem(KEY,JSON.stringify(state));return true}
+  };
+
+    bindTickets();renderExpenses();renderChecklist();renderSummary();renderToday();renderPhrases();renderMaps();refreshSaveStatuses();
   if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}))}
 })();
 </script>
