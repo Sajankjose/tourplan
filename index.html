@@ -406,7 +406,7 @@
 
           <div id="cloudInitPanel" class="note" style="display:none;margin-top:12px">
             <b>Set up cloud copy</b>
-            <div style="margin-top:5px">No v9 cloud copy exists yet. On the device that currently has the correct trip details, tap the button below once.</div>
+            <div style="margin-top:5px">No v10 cloud copy exists yet. On the device that currently has the correct trip details, tap the button below once.</div>
             <div class="cloud-actions"><button id="cloudInitBtn" class="btn" type="button">Use this device as master</button></div>
           </div>
 
@@ -437,8 +437,8 @@
   <button data-target="more"><b>•••</b>More</button>
 </nav>
 
-<script src="./supabase-config.js"></script>
-<script type="module" src="./cloud-sync.js"></script>
+<script src="./supabase-config.js?v=10"></script>
+<script type="module" src="./cloud-sync.js?v=10"></script>
 <script>
 (() => {
   const KEY="delhi_amritsar_trip_v1"; // same key as v1: preserves existing saved data

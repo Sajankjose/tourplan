@@ -1,113 +1,86 @@
-# Delhi + Amritsar Trip Companion — v9 Stable Sync
+# Delhi + Amritsar Trip Companion — v10 Atomic Sync
 
-## Why v9 exists
+This version resets only the cloud-sync layer. The itinerary, tickets, expenses, maps, Hindi helper, reminders and local storage remain the same.
 
-The old cloud model looked up a `trip_state` row through a cached `trip_id`.
-In testing, Supabase contained a `trip_state` row while another device reported that no row existed.
-That means the devices were not consistently resolving the same trip record.
+## Why v10
+Older versions used client-side read → version-filtered update logic. v10 moves the version increment into Supabase itself.
 
-v9 removes that indirection.
+Every local edit calls one database function:
 
-## New sync model
+`save_trip_sync_state(data, device_id)`
 
-`user_trip_state.user_id` is the primary key.
+The database atomically:
+- writes the latest JSON
+- increments `version`
+- records which device wrote it
+- updates `updated_at`
 
-Same Supabase login = same `auth.users.id` = same cloud row.
+## Setup
 
-There is no cached trip ID involved.
+### 1. Keep a backup
+On the DESKTOP that currently has the correct trip data:
+More → Trip details → Export backup
 
-v9 also adds:
-- Supabase Realtime cross-device updates
-- 8-second polling fallback
-- sync on window focus / app foreground
-- optimistic version number
-- device identifier for diagnostics
-- stale-write protection
-- automatic cloud pull after initialization
-
-## Upgrade steps
-
-### 1. Run the new SQL migration
-
+### 2. Run the new SQL
 Supabase → SQL Editor → New query
 
-Paste and run:
+Run:
 
-`supabase-v9-migration.sql`
+`supabase-v10-atomic-sync.sql`
 
-You should then see a new table:
+A new table will appear:
 
-`user_trip_state`
+`trip_sync_state`
 
-Do not delete the old `trips`, `trip_members`, or `trip_state` tables yet. v9 simply stops depending on them.
+Ignore the older `trip_state` and `user_trip_state` tables when testing v10.
 
-### 2. Keep your Supabase config
+### 3. Upload v10 files
+Upload/replace all files in GitHub Pages.
 
-Copy your working Project URL and publishable key into the v9 `supabase-config.js`.
+This package already contains the current public Supabase Project URL + publishable key.
 
-### 3. Upload v9 to GitHub Pages
+### 4. Initialize from desktop
+Open desktop app and sign in.
 
-Replace the current app files with v9.
-
-### 4. IMPORTANT — initialize from the correct device
-
-Open the DESKTOP that currently contains the correct ticket information.
-
-Sign in.
-
-The app should say:
-
-`Set up cloud copy`
+It should say there is no v10 cloud copy.
 
 Tap:
 
 `Use this device as master`
 
-Do this only once.
+Then check:
 
-This creates the new `user_trip_state` row from the desktop's current local data.
+Supabase → Table Editor → `trip_sync_state`
 
-### 5. Mobile
+You should see:
+`version = 1`
 
-Open the app on mobile and sign in with the same email/password.
+### 5. Test desktop write
+Edit a ticket note.
 
-Do NOT initialize from mobile.
+Within about 1 second:
+`version = 2`
 
-The app should automatically load the cloud copy created by desktop.
+Edit another field:
+`version = 3`
 
-## Test
+If version increments, the write path is proven.
 
-Desktop:
-1. Edit a ticket note or amount.
-2. Save / wait ~1 second.
-3. Supabase → Table Editor → `user_trip_state`.
-4. `version` should increase: 1 → 2 → 3...
-5. `updated_at` should change.
+### 6. Open mobile
+Sign in with the same email/password.
 
-Mobile:
-- the change should arrive via Realtime, normally within a few seconds
-- if Realtime is unavailable, polling checks every 8 seconds
-- bringing the app back to the foreground also checks immediately
+Mobile should load the same `trip_sync_state` row.
 
-Then edit something on mobile and verify desktop receives it.
+Desktop and mobile should show the same shortened user ID in Sync diagnostics and different device IDs.
 
-## Supabase diagnostics
+Changes are delivered using:
+- Supabase Realtime first
+- 4-second polling fallback
+- foreground/focus refresh
 
-The app has:
-More → Cloud sync → Sync diagnostics
+## Important
+For v10 testing, look only at:
 
-It shows shortened:
-- device id
-- user id
-- cloud version
-- connection/check status
+`trip_sync_state`
 
-Both devices MUST show the same shortened user id.
-Their device ids should be different.
-Their cloud version should converge to the same number.
-
-## Old data
-
-The old `trip_state` table can remain for now as a backup.
-Once v9 has been tested successfully on both devices, it can be removed in a later cleanup.
-
+Do not use `trip_state` or `user_trip_state` to judge whether v10 is syncing.
