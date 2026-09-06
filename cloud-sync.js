@@ -300,7 +300,7 @@ if(!configured){
       if(signedOut) signedOut.style.display="block";
       if(signedIn) signedIn.style.display="none";
       setPill("Local only","");
-      markCloudCheck("Sign in to enable multi-device sync.");
+      markCloudCheck("Sign in with your email and password to enable multi-device sync.");
     }
   }
 
@@ -313,17 +313,59 @@ if(!configured){
     },POLL_MS);
   }
 
-  $("cloudLoginBtn")?.addEventListener("click",async()=>{
+  $("togglePasswordBtn")?.addEventListener("click",()=>{
+    const input=$("cloudPassword");
+    const btn=$("togglePasswordBtn");
+    if(!input||!btn)return;
+    const showing=input.type==="text";
+    input.type=showing?"password":"text";
+    btn.textContent=showing?"Show":"Hide";
+  });
+
+  async function passwordLogin(){
     const email=String($("cloudEmail")?.value||"").trim();
-    if(!email){setMsg(authMsg,"Enter your email address.","warn");return}
-    setMsg(authMsg,"Sending sign-in link…","");
-    const redirectTo=location.origin+location.pathname;
-    const {error}=await supabase.auth.signInWithOtp({
-      email,
-      options:{emailRedirectTo:redirectTo,shouldCreateUser:true}
-    });
-    if(error) setMsg(authMsg,"Could not send link: "+error.message,"warn");
-    else setMsg(authMsg,"✓ Sign-in link sent. Open it to connect this device.","ok");
+    const password=String($("cloudPassword")?.value||"");
+    if(!email){
+      setMsg(authMsg,"Enter your email address.","warn");
+      return;
+    }
+    if(!password){
+      setMsg(authMsg,"Enter your password.","warn");
+      return;
+    }
+
+    const btn=$("cloudLoginBtn");
+    if(btn){btn.disabled=true;btn.textContent="Signing in…";}
+    setMsg(authMsg,"Signing in…","");
+
+    try{
+      const {data,error}=await supabase.auth.signInWithPassword({email,password});
+      if(error){
+        const msg=String(error.message||"");
+        if(msg.toLowerCase().includes("invalid login credentials")){
+          setMsg(authMsg,"Incorrect email or password.","warn");
+        }else if(msg.toLowerCase().includes("email not confirmed")){
+          setMsg(authMsg,"This user is not confirmed in Supabase. Confirm the user in Authentication → Users.","warn");
+        }else{
+          setMsg(authMsg,"Could not sign in: "+msg,"warn");
+        }
+        return;
+      }
+
+      if(data?.user){
+        setMsg(authMsg,"✓ Signed in.","ok");
+      }
+    }catch(err){
+      console.error("password login",err);
+      setMsg(authMsg,"Could not sign in. Check your connection and Supabase configuration.","warn");
+    }finally{
+      if(btn){btn.disabled=false;btn.textContent="Sign in";}
+    }
+  }
+
+  $("cloudLoginBtn")?.addEventListener("click",passwordLogin);
+  $("cloudPassword")?.addEventListener("keydown",e=>{
+    if(e.key==="Enter") passwordLogin();
   });
 
   $("cloudLogoutBtn")?.addEventListener("click",async()=>{

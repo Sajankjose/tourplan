@@ -1,3 +1,155 @@
+# Delhi + Amritsar Trip Companion — v8 Password Auth
+
+## What changed
+
+v8 uses **Supabase email + password authentication** with `signInWithPassword`.
+
+There is:
+- no magic-link login
+- no Supabase auth email required for normal sign-in
+- no Google OAuth setup
+- persistent Supabase session on the device
+- the same reliable multi-device sync from v5/v6
+- the same local/offline storage, tickets, expenses, maps, Hindi helper, reminders and notes
+
+## Recommended setup for this private trip app
+
+To completely avoid Supabase email rate limits, create the user manually in Supabase.
+
+### 1. Create the user
+
+Open:
+
+**Supabase → Authentication → Users → Add user**
+
+Create a user with:
+- your email
+- a strong password
+- mark / create the user as confirmed if Supabase offers that option
+
+Do not rely on a confirmation email for this private app.
+
+### 2. Sign in from the trip app
+
+Open:
+
+**More → Cloud sync**
+
+Enter the same:
+- email
+- password
+
+Tap **Sign in**.
+
+The Supabase JS client persists the login session in the browser, so you do not need to log in every time unless the session is cleared or you sign out.
+
+### 3. First device
+
+If this device already has the correct trip data:
+
+**More → Cloud sync → Upload this device**
+
+Wait until it shows a cloud sync confirmation.
+
+### 4. Second device
+
+Open the same GitHub Pages app and sign in with the same email/password.
+
+Then use:
+
+**Refresh from cloud**
+
+Your tickets, expenses, notes, reminders and other saved trip data should appear.
+
+## Existing Supabase setup
+
+Keep:
+- `supabase-schema.sql` already run
+- your existing Supabase Project URL
+- your existing publishable key
+- your GitHub Pages Site URL / Redirect URL
+
+No Google provider configuration is required for v8.
+
+## Important before upload
+
+The included `supabase-config.js` may contain placeholders depending on the package you started from.
+
+Make sure v8 has your real:
+- Supabase Project URL
+- `sb_publishable_...` key
+
+Never put a `service_role` or secret key in GitHub.
+
+## Security
+
+Good to store:
+- PNR
+- ticket price
+- flight/train details
+- expenses
+- trip notes
+- hotel/driver details
+
+Do not store:
+- Aadhaar or PAN numbers
+- OTPs
+- card number / CVV
+- banking passwords
+- account passwords
+
+## Multi-device sync test
+
+1. Sign in on desktop.
+2. Enter or change a ticket note.
+3. Wait for cloud sync.
+4. Open the app on mobile and sign in with the same credentials.
+5. Tap **Refresh from cloud** if needed.
+6. The desktop change should appear.
+7. Change something on mobile.
+8. Desktop should receive it when it regains focus or during the periodic cloud check.
+
+# Delhi + Amritsar Trip Companion — v7 Google Login
+
+## Why this version
+Supabase's built-in email sender is rate-limited, so repeated magic-link requests can fail with `email rate limit exceeded`.
+
+v7 makes **Google sign-in the primary option**. Email-link login remains as a fallback.
+
+## One-time Google setup
+
+### In Google Cloud / Google Auth Platform
+Create an OAuth Client:
+- Application type: Web application
+- Authorized JavaScript origin: `https://YOUR-USERNAME.github.io`
+- Authorized redirect URI: use the callback URL shown in Supabase under the Google provider. It normally looks like:
+  `https://YOUR-PROJECT-REF.supabase.co/auth/v1/callback`
+
+Copy the Google Client ID and Client Secret.
+
+### In Supabase
+Go to:
+Authentication → Sign In / Providers → Google
+
+Enable Google, paste:
+- Client ID
+- Client Secret
+
+Save.
+
+Keep your GitHub Pages URL under:
+Authentication → URL Configuration
+
+## Deploy
+Copy your already-correct Supabase Project URL and publishable key into the v7 `supabase-config.js`, then replace the current GitHub Pages files with v7.
+
+## Login
+More → Cloud sync → **Continue with Google**
+
+Use the same Google account on desktop and mobile.
+
+Email login remains under **Other sign-in option**, with a cooldown and a clearer rate-limit message.
+
 # Delhi + Amritsar Trip Companion — v6 Clean UI
 
 ## UI cleanup in v6

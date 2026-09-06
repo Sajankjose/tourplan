@@ -379,15 +379,24 @@
       </div>
       <div class="cloud-panel">
         <div class="route">☁️ Cloud sync</div>
-        <div class="sub">Use the same email on another phone or computer to access the same trip.</div>
+        <div class="sub">Use the same email and password on another phone or computer to access the same trip.</div>
         <div id="cloudSetupNotice" class="note" style="margin-top:10px;display:none">
           Supabase is not configured yet. Add your Project URL and anon key in <b>supabase-config.js</b>.
         </div>
         <div id="cloudSignedOut">
           <label>Email address</label>
-          <input id="cloudEmail" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com">
-          <div class="cloud-actions"><button id="cloudLoginBtn" class="btn" type="button">Email me a sign-in link</button></div>
-          <div id="cloudAuthMsg" class="cloud-msg">No password is stored in this app.</div>
+          <input id="cloudEmail" type="email" inputmode="email" autocomplete="username" placeholder="you@example.com">
+
+          <label>Password</label>
+          <div style="position:relative">
+            <input id="cloudPassword" type="password" autocomplete="current-password" placeholder="Password" style="padding-right:76px">
+            <button id="togglePasswordBtn" type="button" class="btn secondary small" style="position:absolute;right:6px;top:6px;min-height:32px;padding:5px 9px">Show</button>
+          </div>
+
+          <div class="cloud-actions">
+            <button id="cloudLoginBtn" class="btn" type="button">Sign in</button>
+          </div>
+          <div id="cloudAuthMsg" class="cloud-msg">Use the same email and password on your phone and computer.</div>
         </div>
         <div id="cloudSignedIn" style="display:none">
           <div class="summary">
