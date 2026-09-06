@@ -15,7 +15,7 @@ const APPLY_KEY="trip_v10_atomic_applied_version";
 const POLL_MS=4000;
 
 const pill=$("cloudPill"),pillText=$("cloudPillText");
-const setupNotice=$("cloudSetupNotice"),signedOut=$("cloudSignedOut"),signedIn=$("cloudSignedIn");
+const setupNotice=$("cloudSetupNotice"),sessionChecking=$("cloudSessionChecking"),signedOut=$("cloudSignedOut"),signedIn=$("cloudSignedIn");
 const authMsg=$("cloudAuthMsg"),syncMsg=$("cloudSyncMsg"),debugMsg=$("cloudDebugMsg");
 const userEl=$("cloudUser"),lastSyncEl=$("cloudLastSync");
 const initPanel=$("cloudInitPanel"),readyActions=$("cloudReadyActions");
@@ -63,7 +63,12 @@ if(!configured){
   setPill("Cloud not configured","offline");
 }else{
   const supabase=createClient(cfg.url,cfg.anonKey,{
-    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+    auth:{
+      persistSession:true,
+      autoRefreshToken:true,
+      detectSessionInUrl:true,
+      storage:window.localStorage
+    }
   });
 
   let currentUser=null;
@@ -74,6 +79,10 @@ if(!configured){
   let debounce=null;
   let pollTimer=null;
   let realtimeChannel=null;
+
+  function finishSessionCheck(){
+    if(sessionChecking)sessionChecking.style.display="none";
+  }
 
   function debug(text){
     setMsg(
@@ -271,6 +280,7 @@ if(!configured){
 
   async function boot(user){
     currentUser=user;
+    finishSessionCheck();
     if(userEl)userEl.textContent=user.email||"Signed in";
     if(signedOut)signedOut.style.display="none";
     if(signedIn)signedIn.style.display="block";
@@ -301,6 +311,7 @@ if(!configured){
     currentUser=null;
     initialized=false;
     currentVersion=0;
+    finishSessionCheck();
     if(signedOut)signedOut.style.display="block";
     if(signedIn)signedIn.style.display="none";
     setPill("Local only","");
@@ -327,7 +338,12 @@ if(!configured){
     try{
       const {data,error}=await supabase.auth.signInWithPassword({email,password});
       if(error)throw error;
-      if(data?.user)setMsg(authMsg,"✓ Signed in.","ok");
+      if(data?.session){
+        // Supabase persists the access + refresh session in localStorage.
+        // getSession() on future launches will silently restore it.
+        await supabase.auth.getSession();
+      }
+      if(data?.user)setMsg(authMsg,"✓ Signed in. This device will stay signed in.","ok");
     }catch(err){
       setMsg(authMsg,"Could not sign in: "+(err.message||"Unknown error"),"warn");
     }finally{
@@ -404,13 +420,20 @@ if(!configured){
       return;
     }
 
-    if(session?.user&&(!currentUser||currentUser.id!==session.user.id)){
-      try{
-        await boot(session.user);
-        subscribeRealtime();
-        startPolling();
-      }catch(err){
-        setMsg(syncMsg,"Cloud setup error: "+(err.message||"Unknown error"),"warn");
+    // INITIAL_SESSION, SIGNED_IN and TOKEN_REFRESHED all keep the user signed in.
+    if(session?.user){
+      finishSessionCheck();
+      if(!currentUser||currentUser.id!==session.user.id){
+        try{
+          await boot(session.user);
+          subscribeRealtime();
+          startPolling();
+        }catch(err){
+          setMsg(syncMsg,"Cloud setup error: "+(err.message||"Unknown error"),"warn");
+        }
+      }else{
+        if(signedOut)signedOut.style.display="none";
+        if(signedIn)signedIn.style.display="block";
       }
     }
   });

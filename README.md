@@ -1,3 +1,19 @@
+# Delhi + Amritsar Trip Companion — v11 Persistent Login
+
+## Functional fix
+Once a user signs in successfully on a device/browser, the app now explicitly keeps the Supabase session in `localStorage` and silently restores it on future launches.
+
+Expected behaviour:
+- first visit on a device: sign in once
+- next visits on the same browser/PWA: no login prompt
+- Supabase refresh token renews the session automatically
+- login form appears again only after explicit Sign out, browser/site data deletion, or session invalidation
+
+## Important iPhone note
+Safari and an installed Home Screen PWA can behave as separate app/browser storage contexts in some situations. For the cleanest experience, use the installed app consistently after signing in there once.
+
+Avoid Private Browsing for this app because private storage may be discarded by the browser.
+
 # Delhi + Amritsar Trip Companion — v10 Atomic Sync
 
 This version resets only the cloud-sync layer. The itinerary, tickets, expenses, maps, Hindi helper, reminders and local storage remain the same.

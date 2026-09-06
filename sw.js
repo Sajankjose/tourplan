@@ -1,4 +1,4 @@
-const CACHE="trip-app-v10-atomic-sync";
+const CACHE="trip-app-v11-persistent-login";
 const STATIC_ASSETS=["./","./index.html","./manifest.webmanifest","./icon.svg"];
 
 self.addEventListener("install",e=>{

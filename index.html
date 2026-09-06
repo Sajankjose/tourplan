@@ -383,7 +383,8 @@
         <div id="cloudSetupNotice" class="note" style="margin-top:10px;display:none">
           Supabase is not configured yet. Add your Project URL and anon key in <b>supabase-config.js</b>.
         </div>
-        <div id="cloudSignedOut">
+        <div id="cloudSessionChecking" class="cloud-msg">Checking saved sign-in…</div>
+        <div id="cloudSignedOut" style="display:none">
           <label>Email address</label>
           <input id="cloudEmail" type="email" inputmode="email" autocomplete="username" placeholder="you@example.com">
 
@@ -437,8 +438,8 @@
   <button data-target="more"><b>•••</b>More</button>
 </nav>
 
-<script src="./supabase-config.js?v=10"></script>
-<script type="module" src="./cloud-sync.js?v=10"></script>
+<script src="./supabase-config.js?v=11"></script>
+<script type="module" src="./cloud-sync.js?v=11"></script>
 <script>
 (() => {
   const KEY="delhi_amritsar_trip_v1"; // same key as v1: preserves existing saved data
