@@ -1,3 +1,12 @@
+# Delhi + Amritsar Trip Companion — v6 Clean UI
+
+## UI cleanup in v6
+- Removed per-ticket “Saved on this device · date/time” messages.
+- Ticket save control is now a compact **Save** button.
+- After tapping, the button briefly changes to **Saved** without creating extra layout/wrapping.
+- Autosave and Supabase cloud sync remain unchanged.
+- Global cloud sync status remains available under **More → Cloud sync**.
+
 # Delhi + Amritsar Trip Companion — v5 Reliable Multi-Device Sync
 
 ## What v5 fixes

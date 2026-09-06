@@ -49,6 +49,7 @@
     .btn.soft{background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line)}
     .btn.danger{background:#fff5f4;color:var(--danger);border:1px solid #fecaca}
     .btn.small{min-height:38px;padding:8px 10px;font-size:12px}
+.ticket-save-btn{min-width:92px;justify-content:center}
     .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
     .progress{height:8px;background:#e9ecef;border-radius:999px;overflow:hidden;margin-top:8px}.progress>div{height:100%;background:var(--accent);width:0;transition:width .2s}
     .note{background:var(--warn-bg);border:1px solid #fde68a;color:#6b5b11;padding:12px;border-radius:14px;font-size:13px}
@@ -262,7 +263,7 @@
   <section class="section" id="tickets">
     <div class="card">
       <h2>Booked tickets</h2>
-      <p class="muted">Your entries autosave while you type. You can also tap <b>Save Ticket Details</b> for a clear confirmation and saved time. Ticket expenses are included automatically in the trip total.</p>
+      <p class="muted">Your entries autosave while you type. Tap <b>Save</b> anytime to force an immediate save. Ticket expenses are included automatically in the trip total.</p>
       <div class="note">Avoid storing Aadhaar/PAN numbers, card details or passwords here.</div>
 
       <div class="ticket">
@@ -273,7 +274,7 @@
           <div><label>Total ticket cost for 4 (₹)</label><input data-ticket="0" data-field="amount" type="number" min="0" inputmode="numeric" placeholder="0" /></div>
           <div><label>Seats / terminal</label><input data-ticket="0" data-field="seat" placeholder="Seats / terminal" /></div>
         </div>
-        <label>Notes</label><textarea data-ticket="0" data-field="notes" rows="2" placeholder="Baggage, web check-in, coupon used..."></textarea><div class="actions"><button class="btn" type="button" data-save-ticket="0">Save Ticket Details</button><div class="save-status" id="ticketSaveStatus0"><span class="save-dot"></span><span>Autosave is on</span></div></div>
+        <label>Notes</label><textarea data-ticket="0" data-field="notes" rows="2" placeholder="Baggage, web check-in, coupon used..."></textarea><div class="actions"><button class="btn ticket-save-btn" type="button" data-save-ticket="0">Save</button></div>
       </div>
 
       <div class="ticket">
@@ -284,7 +285,7 @@
           <div><label>Total ticket cost for 4 (₹)</label><input data-ticket="1" data-field="amount" type="number" min="0" inputmode="numeric" placeholder="0" /></div>
           <div><label>Coach / seats</label><input data-ticket="1" data-field="seat" placeholder="Coach / seats" /></div>
         </div>
-        <label>Notes</label><textarea data-ticket="1" data-field="notes" rows="2" placeholder="Boarding notes..."></textarea><div class="actions"><button class="btn" type="button" data-save-ticket="1">Save Ticket Details</button><div class="save-status" id="ticketSaveStatus1"><span class="save-dot"></span><span>Autosave is on</span></div></div>
+        <label>Notes</label><textarea data-ticket="1" data-field="notes" rows="2" placeholder="Boarding notes..."></textarea><div class="actions"><button class="btn ticket-save-btn" type="button" data-save-ticket="1">Save</button></div>
       </div>
 
       <div class="ticket">
@@ -295,7 +296,7 @@
           <div><label>Total ticket cost for 4 (₹)</label><input data-ticket="2" data-field="amount" type="number" min="0" inputmode="numeric" placeholder="0" /></div>
           <div><label>Seats / terminal</label><input data-ticket="2" data-field="seat" placeholder="Seats / terminal" /></div>
         </div>
-        <label>Notes</label><textarea data-ticket="2" data-field="notes" rows="2" placeholder="Connection, baggage, web check-in..."></textarea><div class="actions"><button class="btn" type="button" data-save-ticket="2">Save Ticket Details</button><div class="save-status" id="ticketSaveStatus2"><span class="save-dot"></span><span>Autosave is on</span></div></div>
+        <label>Notes</label><textarea data-ticket="2" data-field="notes" rows="2" placeholder="Connection, baggage, web check-in..."></textarea><div class="actions"><button class="btn ticket-save-btn" type="button" data-save-ticket="2">Save</button></div>
       </div>
     </div>
   </section>
@@ -545,11 +546,7 @@
   function refreshSaveStatuses(){
     state.ticketSavedAt=(Array.isArray(state.ticketSavedAt)?state.ticketSavedAt:["","",""]).slice(0,3);
     while(state.ticketSavedAt.length<3)state.ticketSavedAt.push("");
-    state.ticketSavedAt.forEach((iso,i)=>{
-      if(iso)setSaveStatus("ticketSaveStatus"+i,"✓ Saved on this device · "+formatSavedTime(iso),"saved");
-      else setSaveStatus("ticketSaveStatus"+i,"Autosave is on","");
-    });
-    if(state.globalSavedAt)setSaveStatus("globalSaveStatus","✓ All trip data saved · "+formatSavedTime(state.globalSavedAt),"saved");
+    if(state.globalSavedAt)setSaveStatus("globalSaveStatus","Saved","saved");
     else setSaveStatus("globalSaveStatus","Autosave is on","");
   }
 
@@ -565,7 +562,6 @@
         state.tickets[i][f]=v;
         save();
         document.getElementById("ticketAmt"+i).textContent=money(state.tickets[i].amount);
-        setSaveStatus("ticketSaveStatus"+i,"Autosaved just now","saved");
       });
     });
     document.querySelectorAll("[data-save-ticket]").forEach(btn=>{
@@ -582,7 +578,10 @@
         localStorage.setItem(KEY,JSON.stringify(state));
         window.dispatchEvent(new CustomEvent("trip:local-save",{detail:{state:clone(state)}}));
         renderSummary();
-        setSaveStatus("ticketSaveStatus"+i,"✓ Saved on this device · "+formatSavedTime(state.ticketSavedAt[i]),"saved");
+        const original=btn.textContent;
+        btn.textContent="Saved";
+        btn.disabled=true;
+        setTimeout(()=>{btn.textContent=original;btn.disabled=false},1200);
       });
     });
     state.tickets.forEach((t,i)=>document.getElementById("ticketAmt"+i).textContent=money(t.amount));
@@ -769,7 +768,7 @@
     localStorage.setItem(KEY,JSON.stringify(state));
     window.dispatchEvent(new CustomEvent("trip:local-save",{detail:{state:clone(state)}}));
     renderSummary();
-    setSaveStatus("globalSaveStatus","✓ All trip data saved · "+formatSavedTime(state.globalSavedAt),"saved");
+    setSaveStatus("globalSaveStatus","Saved","saved");
   });
 
   document.getElementById("exportBtn").addEventListener("click",()=>{
