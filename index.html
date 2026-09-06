@@ -170,8 +170,8 @@
       <div class="timeline">
         <div class="day"><div class="date">10 OCT<small>Saturday</small></div><div class="daybody">
           <h3>Delhi arrival + relaxed food day</h3>
-          <div class="item"><span class="time">05:30</span>Kochi flight departure</div>
-          <div class="item"><span class="time">08:45</span>Arrive Delhi</div>
+          <div class="item"><span class="time">05:30</span>IndiGo 6E 2706 · Kochi T1 → Delhi T2</div>
+          <div class="item"><span class="time">08:45</span>Arrive Delhi T2 · Panicker’s airport pickup → hotel</div>
           <div class="item"><span class="time">~10:30</span>Hotel luggage drop, Karol Bagh</div>
           <div class="item"><span class="time">12:00–13:00</span>Andhra Bhavan lunch</div>
           <div class="item"><span class="time">13:10–13:50</span>Gurudwara Bangla Sahib</div>
@@ -188,7 +188,7 @@
         <div class="day"><div class="date">12 OCT<small>Monday</small></div><div class="daybody">
           <h3>Delhi → Amritsar + local evening</h3>
           <div class="item"><span class="time">~06:10</span>Leave Delhi hotel</div>
-          <div class="item"><span class="time">07:20–13:30</span>Train to Amritsar</div>
+          <div class="item"><span class="time">07:20–13:30</span>12029 Swarn Shatabdi · Executive Class · NDLS → ASR</div>
           <div class="item"><span class="time">~14:15</span>Hotel / freshen up</div>
           <div class="item"><span class="time">14:45–15:30</span>Light lunch</div>
           <div class="item"><span class="time">15:30–16:15</span>Rest</div>
@@ -211,7 +211,7 @@
           <div class="item"><span class="time">~05:00</span>Wake up</div>
           <div class="item"><span class="time">~05:45</span>Leave hotel</div>
           <div class="item"><span class="time">~06:30</span>Reach airport</div>
-          <div class="item"><span class="time">08:20</span>Flight departure</div>
+          <div class="item"><span class="time">08:20</span>IndiGo 6E 6119 · Amritsar → Mumbai T2</div><div class="item"><span class="time">10:55</span>Arrive Mumbai T2</div><div class="item"><span class="time">12:30</span>IndiGo 6E 673 · Mumbai T2 → Kochi T1</div><div class="item"><span class="time">14:25</span>Arrive Kochi T1</div>
           <div class="note">Ask for a packed breakfast on the previous evening.</div>
         </div></div>
       </div>
@@ -438,8 +438,8 @@
   <button data-target="more"><b>•••</b>More</button>
 </nav>
 
-<script src="./supabase-config.js?v=11"></script>
-<script type="module" src="./cloud-sync.js?v=11"></script>
+<script src="./supabase-config.js?v=12"></script>
+<script type="module" src="./cloud-sync.js?v=12"></script>
 <script>
 (() => {
   const KEY="delhi_amritsar_trip_v1"; // same key as v1: preserves existing saved data
@@ -469,19 +469,105 @@
     hotelNotes:"",foodNotes:"",generalNotes:"",
     delhiHotelName:"",delhiHotelAddress:"",amritsarHotelName:"",amritsarHotelAddress:"",
     delhiDriver:"",amritsarDriver:"",
-    ticketSavedAt:["","",""],globalSavedAt:""
+    ticketSavedAt:["","",""],globalSavedAt:"",
+    bookingDocsSeedVersion:0
   };
+
+  const BOOKING_DOCS_SEED_VERSION=1;
+
+  function appendUniqueNote(existing,marker,text){
+    const current=String(existing||"").trim();
+    if(current.includes(marker))return current;
+    return current ? current+"\n\n"+text : text;
+  }
+
+  function applyBookingDocsSeed(s){
+    if((Number(s.bookingDocsSeedVersion)||0)>=BOOKING_DOCS_SEED_VERSION)return s;
+
+    s.tickets=Array.isArray(s.tickets)?s.tickets:clone(defaults.tickets);
+    while(s.tickets.length<3)s.tickets.push({carrier:"",pnr:"",amount:0,seat:"",notes:""});
+
+    // Confirmed booking: Kochi → Delhi
+    s.tickets[0]=Object.assign({},s.tickets[0],{
+      carrier:"IndiGo 6E 2706 (A321)",
+      pnr:"RB5WYM",
+      amount:47932,
+      seat:"Sajan 34E · Jaya 35E · Sidharth 34F · Jeevan 35F",
+      notes:appendUniqueNote(
+        s.tickets[0]?.notes,
+        "[Booking docs · COK-DEL]",
+        "[Booking docs · COK-DEL]\n10 Oct 2026 · COK Terminal 1 05:30 → DEL Terminal 2 08:45 · Travel 3h 15m · Check-in/Bag Drop closes 04:30 · Baggage per passenger: 15 kg check-in + up to 7 kg cabin · Zero Cancellation add-on."
+      )
+    });
+
+    // Confirmed booking: Delhi → Amritsar train
+    s.tickets[1]=Object.assign({},s.tickets[1],{
+      carrier:"12029 Swarn Shatabdi · Executive Class (EC)",
+      pnr:"2843140474",
+      amount:7957.20,
+      seat:"E1 · Sajan 50 Aisle · Jaya 51 Aisle · Sidharth 49 Window · Jeevan 52 Window",
+      notes:appendUniqueNote(
+        s.tickets[1]?.notes,
+        "[Booking docs · NDLS-ASR]",
+        "[Booking docs · NDLS-ASR]\n12 Oct 2026 · New Delhi 07:20 → Amritsar Jn 13:30 · 448 km · All 4 confirmed · Non-veg catering for all 4 · Total fare ₹7,957.20."
+      )
+    });
+
+    // Confirmed booking: Amritsar → Kochi via Mumbai
+    s.tickets[2]=Object.assign({},s.tickets[2],{
+      carrier:"IndiGo 6E 6119 + 6E 673 · via Mumbai",
+      pnr:"UIQS2B",
+      amount:53358,
+      seat:"Sajan 34A · Jaya 34B · Sidharth 35B · Jeevan 35A (both sectors)",
+      notes:appendUniqueNote(
+        s.tickets[2]?.notes,
+        "[Booking docs · ATQ-COK]",
+        "[Booking docs · ATQ-COK]\n14 Oct 2026 · 6E 6119: ATQ 08:20 → BOM Terminal 2 10:55 · 6E 673: BOM Terminal 2 12:30 → COK Terminal 1 14:25 · Check-in/Bag Drop closes 07:20 for first sector and 11:30 for second · Baggage per passenger: 15 kg check-in + up to 7 kg cabin."
+      )
+    });
+
+    s.agencyCost=33258;
+
+    if(!String(s.delhiHotelName||"").trim())s.delhiHotelName="Royal Comfort or similar (Panicker’s)";
+    if(!String(s.amritsarHotelName||"").trim())s.amritsarHotelName="Ritz Plaza (per Panicker’s itinerary)";
+
+    s.hotelNotes=appendUniqueNote(
+      s.hotelNotes,
+      "[Booking docs · Panicker’s]",
+      "[Booking docs · Panicker’s]\nDelhi: Royal Comfort or similar · room-only basis · 2 nights · hotel check-in 14:00 · checkout 12:00.\nAmritsar: document mentions Ritz Plaza, 1 room + 1 extra mattress, MAP basis (breakfast & dinner) for 1 night. The package section separately states 2 nights / 3 days in Amritsar, so confirm the remaining Amritsar night with the agency.\nTransfers: Delhi airport pickup/drop to hotel; Delhi station drop; Amritsar station pickup; Amritsar airport drop."
+    );
+
+    s.generalNotes=appendUniqueNote(
+      s.generalNotes,
+      "[Booking docs · Package]",
+      "[Booking docs · Package]\nPanicker’s total transportation + accommodation: ₹31,675 + 5% GST ₹1,583 = ₹33,258 for 4 pax.\nDelhi vehicle: Swift Dzire. Delhi local sightseeing quote is 80 km / 8 hrs; extra km ₹15 and extra hour ₹200; parking extra. Package inclusions include transfers/sightseeing, fuel, toll/taxes and driver charges. Air/train fare, monument entry, food/activity charges and Delhi local/airport parking are excluded.\nYour customised Delhi sightseeing plan remains in the app; Qutub Minar and Lotus Temple are intentionally not re-added."
+    );
+
+    s.reminders=Array.isArray(s.reminders)?s.reminders:[];
+    const addReminder=(text,when="")=>{
+      if(!s.reminders.some(r=>String(r.text||r.t||"")===text)){
+        s.reminders.push({text,done:false,when});
+      }
+    };
+    addReminder("Kochi → Delhi: check-in/bag drop closes 04:30","2026-10-10T04:00");
+    addReminder("Train: carry original ID proof; NDLS 07:20 → ASR 13:30","2026-10-12T06:00");
+    addReminder("Amritsar → Kochi: check-in/bag drop closes 07:20","2026-10-14T06:15");
+    addReminder("Confirm the Amritsar hotel-night arrangement with Panicker’s (document has a 1-night / 2-night inconsistency)","");
+
+    s.bookingDocsSeedVersion=BOOKING_DOCS_SEED_VERSION;
+    return s;
+  }
   function load(){
     try{
       const raw=localStorage.getItem(KEY);
-      if(!raw)return clone(defaults);
+      if(!raw)return applyBookingDocsSeed(clone(defaults));
       const d=JSON.parse(raw);
       const s=Object.assign(clone(defaults),d);
       s.tickets=defaults.tickets.map((t,i)=>Object.assign({},t,(d.tickets||[])[i]||{}));
       s.reminders=Array.isArray(d.reminders)?d.reminders.map(r=>({text:r.text||r.t||"",done:!!(r.done??r.d),when:r.when||""})):clone(defaults.reminders);
       s.expenses=Array.isArray(d.expenses)?d.expenses:[];
-      return s;
-    }catch(e){return clone(defaults)}
+      return applyBookingDocsSeed(s);
+    }catch(e){return applyBookingDocsSeed(clone(defaults))}
   }
   let state=load();
   const save=()=>{
@@ -509,11 +595,11 @@
   document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>showSection(b.dataset.go)));
 
   const days={
-    "2026-10-10":{label:"10 Oct · Saturday",title:"Delhi arrival + relaxed food day",subtitle:"Keep the first day light after the early flight.",ticket:"05:30",ticketLabel:"Kochi → Delhi flight",next:"05:30 · Kochi flight departure",detail:"Flight reaches Delhi at 08:45.",items:["05:30 · Kochi flight departure","08:45 · Arrive Delhi","~10:30 · Hotel luggage drop","12:00–13:00 · Andhra Bhavan lunch","13:10–13:50 · Bangla Sahib","~14:15 · Hotel check-in","14:30–17:30 · Rest","18:15–20:00 · Karol Bagh market + kulfi"]},
+    "2026-10-10":{label:"10 Oct · Saturday",title:"Delhi arrival + relaxed food day",subtitle:"Keep the first day light after the early flight.",ticket:"05:30",ticketLabel:"IndiGo 6E 2706 · Kochi → Delhi",next:"05:30 · IndiGo 6E 2706 departure",detail:"Kochi T1 → Delhi T2 · arrives 08:45 · check-in/bag drop closes 04:30.",items:["05:30 · IndiGo 6E 2706 · Kochi T1 → Delhi T2","08:45 · Arrive Delhi T2 · Panicker’s pickup","~10:30 · Hotel luggage drop","12:00–13:00 · Andhra Bhavan lunch","13:10–13:50 · Bangla Sahib","~14:15 · Hotel check-in","14:30–17:30 · Rest","18:15–20:00 · Karol Bagh market + kulfi"]},
     "2026-10-11":{label:"11 Oct · Sunday",title:"Full Delhi sightseeing",subtitle:"Main sightseeing day.",ticket:"09:00",ticketLabel:"Target sightseeing start",next:"~09:00 · Leave hotel",detail:"Raj Ghat → central Delhi → Red Fort → Chandni Chowk.",items:["Raj Ghat","India Gate / Kartavya Path","Rashtrapati Bhavan / Parliament area","Indira Gandhi Memorial / Teen Murti","Red Fort","Chandni Chowk","Birla Mandir if time"]},
-    "2026-10-12":{label:"12 Oct · Monday",title:"Delhi → Amritsar + local evening",subtitle:"Train, rest, market, food and Golden Temple at night.",ticket:"07:20",ticketLabel:"Delhi → Amritsar train",next:"~06:10 · Leave Delhi hotel",detail:"Aim to reach New Delhi station comfortably before departure.",items:["~06:10 · Leave Delhi hotel","07:20–13:30 · Train to Amritsar","~14:15 · Hotel / freshen up","14:45–15:30 · Light lunch","15:30–16:15 · Rest","16:30–17:15 · Hall Bazaar","17:15–17:35 · Lassi","17:40–18:00 · Heritage Street","18:00–19:15 · Golden Temple evening visit","19:20–20:00 · Punjabi dinner"]},
+    "2026-10-12":{label:"12 Oct · Monday",title:"Delhi → Amritsar + local evening",subtitle:"Train, rest, market, food and Golden Temple at night.",ticket:"07:20",ticketLabel:"12029 Swarn Shatabdi · EC",next:"~06:10 · Leave Delhi hotel",detail:"Panicker’s station drop · NDLS departure 07:20 · ASR arrival 13:30.",items:["~06:10 · Leave Delhi hotel / station drop","07:20–13:30 · 12029 Swarn Shatabdi · Executive Class","~14:15 · Hotel / freshen up","14:45–15:30 · Light lunch","15:30–16:15 · Rest","16:30–17:15 · Hall Bazaar","17:15–17:35 · Lassi","17:40–18:00 · Heritage Street","18:00–19:15 · Golden Temple evening visit","19:20–20:00 · Punjabi dinner"]},
     "2026-10-13":{label:"13 Oct · Tuesday",title:"Main Amritsar day",subtitle:"Golden Temple, Jallianwala Bagh and Wagah.",ticket:"14:30",ticketLabel:"Target leave for Wagah",next:"Morning · Golden Temple",detail:"Keep a short rest before the Wagah drive.",items:["Golden Temple proper visit","Amritsari breakfast","Jallianwala Bagh + Old City","Lunch + hotel rest","~14:30 · Leave for Attari–Wagah Border","Border ceremony","Dinner + hotel"]},
-    "2026-10-14":{label:"14 Oct · Wednesday",title:"Amritsar → Kochi",subtitle:"Early airport morning.",ticket:"08:20",ticketLabel:"Amritsar → Kochi flight",next:"~05:45 · Leave hotel",detail:"Target airport arrival around 06:30.",items:["~05:00 · Wake up","~05:45 · Leave hotel","~06:30 · Reach airport","08:20 · Flight departure","Packed breakfast if arranged"]}
+    "2026-10-14":{label:"14 Oct · Wednesday",title:"Amritsar → Kochi",subtitle:"Early airport morning via Mumbai.",ticket:"08:20",ticketLabel:"6E 6119 + 6E 673 · via Mumbai",next:"~05:45 · Leave hotel",detail:"ATQ 08:20 → BOM 10:55 · BOM 12:30 → COK 14:25. Check-in/bag drop closes 07:20.",items:["~05:00 · Wake up","~05:45 · Leave hotel","~06:30 · Reach airport","08:20 · 6E 6119 · Amritsar → Mumbai","10:55 · Arrive Mumbai T2","12:30 · 6E 673 · Mumbai → Kochi","14:25 · Arrive Kochi T1","Packed breakfast if arranged"]}
   };
   function localDateKey(d=new Date()){
     const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");
@@ -816,7 +902,8 @@
       location.reload();
       return true;
     },
-    saveLocal:()=>{localStorage.setItem(KEY,JSON.stringify(state));return true}
+    saveLocal:()=>{localStorage.setItem(KEY,JSON.stringify(state));return true},
+    bookingDocsSeedVersion:()=>Number(state.bookingDocsSeedVersion)||0
   };
 
     bindTickets();renderExpenses();renderChecklist();renderSummary();renderToday();renderPhrases();renderMaps();refreshSaveStatuses();

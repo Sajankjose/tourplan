@@ -278,6 +278,18 @@ if(!configured){
     },POLL_MS);
   }
 
+  async function ensureBookingDocsSeedInCloud(row){
+    const local=localState();
+    const localSeed=Number(local?.bookingDocsSeedVersion)||0;
+    const cloudSeed=Number(row?.data?.bookingDocsSeedVersion)||0;
+    if(localSeed>cloudSeed && initialized){
+      setMsg(syncMsg,"Adding confirmed booking details…","ok");
+      await atomicSave({manual:false});
+      return true;
+    }
+    return false;
+  }
+
   async function boot(user){
     currentUser=user;
     finishSessionCheck();
@@ -303,8 +315,13 @@ if(!configured){
     }
 
     showReady(row);
-    setMsg(syncMsg,"✓ Up to date","ok");
-    debug("boot complete");
+    const seeded=await ensureBookingDocsSeedInCloud(row);
+    if(!seeded){
+      setMsg(syncMsg,"✓ Up to date","ok");
+      debug("boot complete");
+    }else{
+      debug("confirmed booking details added");
+    }
   }
 
   function signedOutView(){

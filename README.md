@@ -1,3 +1,48 @@
+# Delhi + Amritsar Trip Companion — v12 Confirmed Bookings Prefilled
+
+## Prefilled from the uploaded booking documents
+
+### Kochi → Delhi
+- IndiGo 6E 2706 (A321)
+- 10 Oct 2026
+- COK T1 05:30 → DEL T2 08:45
+- PNR RB5WYM
+- Fare for 4: ₹47,932
+- Seats: Sajan 34E, Jaya 35E, Sidharth 34F, Jeevan 35F
+- 15 kg check-in + 7 kg cabin per passenger
+- check-in/bag drop closes 04:30
+
+### Delhi → Amritsar
+- 12029 Swarn Shatabdi
+- Executive Class
+- 12 Oct 2026, NDLS 07:20 → ASR 13:30
+- PNR 2843140474
+- Fare: ₹7,957.20
+- E1 seats: Sajan 50 aisle, Jaya 51 aisle, Sidharth 49 window, Jeevan 52 window
+- all confirmed, non-veg catering
+
+### Amritsar → Kochi
+- PNR UIQS2B
+- 14 Oct 2026
+- 6E 6119: ATQ 08:20 → BOM T2 10:55
+- 6E 673: BOM T2 12:30 → COK T1 14:25
+- Fare for 4: ₹53,358
+- Seats: Sajan 34A, Jaya 34B, Sidharth 35B, Jeevan 35A
+- 15 kg check-in + 7 kg cabin per passenger
+
+### Panicker's
+- package cost: ₹33,258 including quoted GST
+- Delhi: Royal Comfort or similar, room-only, 2 nights
+- hotel check-in 14:00, checkout 12:00
+- Amritsar itinerary mentions Ritz Plaza with breakfast & dinner
+- transfer notes added
+- customized Delhi sightseeing plan retained; Qutub Minar and Lotus Temple were not restored
+
+## Existing cloud users
+This version has a one-time booking-document migration. When the existing signed-in app opens, it adds the confirmed booking data to the current local state and saves the updated state to the existing atomic cloud sync.
+
+Existing free-text notes are preserved and document-derived notes are appended rather than blindly replacing them.
+
 # Delhi + Amritsar Trip Companion — v11 Persistent Login
 
 ## Functional fix
