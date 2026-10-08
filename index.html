@@ -234,15 +234,15 @@
         <div class="box"><b id="spentTotal">₹0</b><span>Total booked / spent</span></div>
         <div class="box"><b id="remainingBudget">₹1,50,000</b><span>Budget remaining</span></div>
         <div class="box"><b id="ticketTotal">₹0</b><span>Ticket expenses</span></div>
-        <div class="box"><b id="otherTotal">₹33,258</b><span>Package + daily expenses</span></div>
+        <div class="box"><b id="otherTotal">₹32,235</b><span>Package + daily expenses</span></div>
       </div>
       <label>Overall trip budget for 4 (₹)</label><input id="budget" type="number" value="150000" min="0" inputmode="numeric" />
       <div class="progress"><div id="budgetProgress"></div></div>
     </div>
     <div class="card">
       <h3>Package / fixed cost</h3>
-      <label>Panicker’s Travel quotation / revised package (₹)</label><input id="agencyCost" type="number" value="33258" min="0" inputmode="numeric" />
-      <div class="note" style="margin-top:10px">Update this amount when Panicker’s confirms the revised sightseeing, Amritsar nights and final GST breakup.</div>
+      <label>Panicker’s Travel quotation / revised package (₹)</label><input id="agencyCost" type="number" value="32235" min="0" inputmode="numeric" />
+      <div class="note" style="margin-top:10px">Confirmed package: Delhi ₹11,760 + Amritsar ₹20,475 = ₹32,235 including GST for four travellers. Amritsar includes two breakfasts and two dinners; Delhi is room-only.</div>
     </div>
     <div class="card">
       <h3>Add daily expense</h3>
@@ -445,7 +445,7 @@
   const KEY="delhi_amritsar_trip_v1"; // same key as v1: preserves existing saved data
   const clone=o=>JSON.parse(JSON.stringify(o));
   const defaults={
-    budget:150000,agencyCost:33258,
+    budget:150000,agencyCost:32235,
     tickets:[
       {carrier:"",pnr:"",amount:0,seat:"",notes:""},
       {carrier:"12029 Swarn Shatabdi · CC",pnr:"",amount:0,seat:"",notes:""},
@@ -563,6 +563,8 @@
       if(!raw)return applyBookingDocsSeed(clone(defaults));
       const d=JSON.parse(raw);
       const s=Object.assign(clone(defaults),d);
+      // Migrate only the previous default quote, not a custom user-entered package amount.
+      if(Number(s.agencyCost)===33258)s.agencyCost=32235;
       s.tickets=defaults.tickets.map((t,i)=>Object.assign({},t,(d.tickets||[])[i]||{}));
       s.reminders=Array.isArray(d.reminders)?d.reminders.map(r=>({text:r.text||r.t||"",done:!!(r.done??r.d),when:r.when||""})):clone(defaults.reminders);
       s.expenses=Array.isArray(d.expenses)?d.expenses:[];
@@ -910,5 +912,6 @@
   if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}))}
 })();
 </script>
+<script src="./meals-expenses.js?v=3"></script>
 </body>
 </html>
