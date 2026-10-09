@@ -169,21 +169,27 @@
       <h2>Complete itinerary</h2>
       <div class="timeline">
         <div class="day"><div class="date">10 OCT<small>Saturday</small></div><div class="daybody">
-          <h3>Delhi arrival + relaxed food day</h3>
-          <div class="item"><span class="time">05:30</span>IndiGo 6E 2706 · Kochi T1 → Delhi T2</div>
-          <div class="item"><span class="time">08:45</span>Arrive Delhi T2 · Panicker’s airport pickup → hotel</div>
-          <div class="item"><span class="time">~10:30</span>Hotel luggage drop, Karol Bagh</div>
-          <div class="item"><span class="time">12:00–13:00</span>Andhra Bhavan lunch</div>
-          <div class="item"><span class="time">13:10–13:50</span>Gurudwara Bangla Sahib</div>
-          <div class="item"><span class="time">~14:15</span>Hotel check-in</div>
-          <div class="item"><span class="time">14:30–17:30</span>Rest</div>
-          <div class="item"><span class="time">18:15–20:00</span>Karol Bagh market + kulfi</div>
+          <h3>Easy arrival · National Museum · India Gate · shopping</h3>
+          <div class="item"><span class="time">08:45</span>Land at Delhi T2; Panicker’s airport pickup</div>
+          <div class="item"><span class="time">10:15</span>Breakfast around Karol Bagh (dosa, idli or chole bhature)</div>
+          <div class="item"><span class="time">11:15–12:45</span>Hotel luggage drop, freshen up and relax; standard check-in 14:00</div>
+          <div class="item"><span class="time">13:00–14:00</span>Lunch at a comfortable nearby restaurant (non-veg option)</div>
+          <div class="item"><span class="time">14:30–15:45</span>National Museum (confirm same-day gallery opening)</div>
+          <div class="item"><span class="time">16:15–17:00</span>India Gate; unhurried photo stop</div>
+          <div class="item"><span class="time">17:30–19:00</span>Connaught Place and Janpath: shopping, cafés and a short snack</div>
+          <div class="item"><span class="time">19:00–20:00</span>Dinner at Sandoz or a nearby North Indian / Mughlai restaurant</div>
+          <div class="note">Saturday museum and sightseeing transport is extra unless arranged with Panicker’s. Drop any stop if the morning flight is tiring.</div>
         </div></div>
         <div class="day"><div class="date">11 OCT<small>Sunday</small></div><div class="daybody">
-          <h3>Full Delhi sightseeing</h3>
-          <div class="item"><span class="time">~09:00</span>Start from hotel</div>
-          <div class="pillrow"><span class="pill">Raj Ghat</span><span class="pill">India Gate / Kartavya Path</span><span class="pill">Rashtrapati Bhavan / Parliament</span><span class="pill">Indira Gandhi Memorial / Teen Murti</span><span class="pill">Red Fort</span><span class="pill">Chandni Chowk</span><span class="pill">Birla Mandir if time</span></div>
-          <p class="muted">Qutub Minar and Lotus Temple excluded.</p>
+          <h3>Crafts, food, optional museum and nearby shopping</h3>
+          <div class="item"><span class="time">08:30–09:15</span>Breakfast around Karol Bagh</div>
+          <div class="item"><span class="time">10:00–11:30</span>National Crafts Museum, Pragati Maidan</div>
+          <div class="item"><span class="time">12:00–13:00</span>Lunch: Café Lota (regional cuisine) or a non-veg restaurant on the onward route</div>
+          <div class="item"><span class="time">13:30–15:00</span>OPTIONAL Pradhanmantri Sangrahalaya; skip if tired</div>
+          <div class="item"><span class="time">15:30–17:30</span>Return to hotel and rest</div>
+          <div class="item"><span class="time">17:30–18:45</span>Optional Ajmal Khan Road / Karol Bagh shopping and a small street-food tasting</div>
+          <div class="item"><span class="time">19:00–20:00</span>Early dinner near hotel (non-veg available)</div>
+          <div class="note">Relaxed plan; Red Fort, Chandni Chowk, Humayun’s Tomb, Qutub Minar, Lotus Temple and Akshardham excluded. Confirm route and charges with Panicker’s (contracted 8 hrs / 80 km).</div>
         </div></div>
         <div class="day"><div class="date">12 OCT<small>Monday</small></div><div class="daybody">
           <h3>Delhi → Amritsar + local evening</h3>
@@ -597,8 +603,8 @@
   document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>showSection(b.dataset.go)));
 
   const days={
-    "2026-10-10":{label:"10 Oct · Saturday",title:"Delhi arrival + relaxed food day",subtitle:"Keep the first day light after the early flight.",ticket:"05:30",ticketLabel:"IndiGo 6E 2706 · Kochi → Delhi",next:"05:30 · IndiGo 6E 2706 departure",detail:"Kochi T1 → Delhi T2 · arrives 08:45 · check-in/bag drop closes 04:30.",items:["05:30 · IndiGo 6E 2706 · Kochi T1 → Delhi T2","08:45 · Arrive Delhi T2 · Panicker’s pickup","~10:30 · Hotel luggage drop","12:00–13:00 · Andhra Bhavan lunch","13:10–13:50 · Bangla Sahib","~14:15 · Hotel check-in","14:30–17:30 · Rest","18:15–20:00 · Karol Bagh market + kulfi"]},
-    "2026-10-11":{label:"11 Oct · Sunday",title:"Full Delhi sightseeing",subtitle:"Main sightseeing day.",ticket:"09:00",ticketLabel:"Target sightseeing start",next:"~09:00 · Leave hotel",detail:"Raj Ghat → central Delhi → Red Fort → Chandni Chowk.",items:["Raj Ghat","India Gate / Kartavya Path","Rashtrapati Bhavan / Parliament area","Indira Gandhi Memorial / Teen Murti","Red Fort","Chandni Chowk","Birla Mandir if time"]},
+    "2026-10-10":{label:"10 Oct · Saturday",title:"Relaxed Delhi arrival + museum",subtitle:"Breakfast, rest, National Museum, India Gate and easy shopping.",ticket:"05:30",ticketLabel:"IndiGo 6E 2706 · Kochi → Delhi",next:"08:45 · Arrive Delhi T2",detail:"Panicker’s airport pickup · breakfast and hotel rest before sightseeing.",items:["08:45 · Arrive Delhi T2 · airport pickup","10:15 · Karol Bagh breakfast","11:15 · Hotel luggage drop and rest (check-in from 14:00)","13:00 · Relaxed lunch; non-veg options","14:30 · National Museum (confirm gallery opening)","16:15 · India Gate photo stop","17:30 · Connaught Place and Janpath shopping","19:00 · Dinner near Connaught Place","20:30 · Hotel"]},
+    "2026-10-11":{label:"11 Oct · Sunday",title:"Crafts museum + relaxed local food",subtitle:"One core museum, an optional second museum, and plenty of rest.",ticket:"10:00",ticketLabel:"Crafts Museum visit",next:"08:30 · Breakfast near hotel",detail:"National Crafts Museum → lunch → optional Pradhanmantri Sangrahalaya → hotel rest → Karol Bagh.",items:["08:30 · Breakfast near Karol Bagh","10:00 · National Crafts Museum","12:00 · Lunch: Café Lota or non-veg alternative","13:30 · OPTIONAL Pradhanmantri Sangrahalaya","15:30 · Hotel rest","17:30 · OPTIONAL Ajmal Khan Road shopping / street food","19:00 · Early non-veg dinner near hotel"]},
     "2026-10-12":{label:"12 Oct · Monday",title:"Delhi → Amritsar + local evening",subtitle:"Train, rest, market, food and Golden Temple at night.",ticket:"07:20",ticketLabel:"12029 Swarn Shatabdi · EC",next:"~06:10 · Leave Delhi hotel",detail:"Panicker’s station drop · NDLS departure 07:20 · ASR arrival 13:30.",items:["~06:10 · Leave Delhi hotel / station drop","07:20–13:30 · 12029 Swarn Shatabdi · Executive Class","~14:15 · Hotel / freshen up","14:45–15:30 · Light lunch","15:30–16:15 · Rest","16:30–17:15 · Hall Bazaar","17:15–17:35 · Lassi","17:40–18:00 · Heritage Street","18:00–19:15 · Golden Temple evening visit","19:20–20:00 · Punjabi dinner"]},
     "2026-10-13":{label:"13 Oct · Tuesday",title:"Main Amritsar day",subtitle:"Golden Temple, Jallianwala Bagh and Wagah.",ticket:"14:30",ticketLabel:"Target leave for Wagah",next:"Morning · Golden Temple",detail:"Keep a short rest before the Wagah drive.",items:["Golden Temple proper visit","Amritsari breakfast","Jallianwala Bagh + Old City","Lunch + hotel rest","~14:30 · Leave for Attari–Wagah Border","Border ceremony","Dinner + hotel"]},
     "2026-10-14":{label:"14 Oct · Wednesday",title:"Amritsar → Kochi",subtitle:"Early airport morning via Mumbai.",ticket:"08:20",ticketLabel:"6E 6119 + 6E 673 · via Mumbai",next:"~05:45 · Leave hotel",detail:"ATQ 08:20 → BOM 10:55 · BOM 12:30 → COK 14:25. Check-in/bag drop closes 07:20.",items:["~05:00 · Wake up","~05:45 · Leave hotel","~06:30 · Reach airport","08:20 · 6E 6119 · Amritsar → Mumbai","10:55 · Arrive Mumbai T2","12:30 · 6E 673 · Mumbai → Kochi","14:25 · Arrive Kochi T1","Packed breakfast if arranged"]}
@@ -764,19 +770,17 @@
   detailIds.forEach(id=>{const el=document.getElementById(id);el.value=state[id]||"";el.addEventListener("input",()=>{state[id]=el.value;save()})});
 
   const routes=[
-    {day:"10 Oct",title:"Delhi arrival day",subtitle:"Food + Bangla Sahib + Karol Bagh",city:"Delhi",stops:[
+    {day:"10 Oct",title:"Relaxed Delhi highlights",subtitle:"Hotel → National Museum → India Gate → Connaught Place",city:"Delhi",stops:[
       ["Hotel / Karol Bagh",()=>state.delhiHotelAddress||"Karol Bagh, New Delhi"],
-      ["Andhra Bhavan Canteen",()=>"Andhra Bhavan Canteen, 1 Ashoka Road, New Delhi"],
-      ["Gurudwara Bangla Sahib",()=>"Gurudwara Bangla Sahib, New Delhi"],
-      ["Karol Bagh Market",()=>"Karol Bagh Market, New Delhi"]
-    ]},
-    {day:"11 Oct",title:"Delhi sightseeing",subtitle:"Split into morning and Old Delhi",city:"Delhi",stops:[
-      ["Raj Ghat",()=>"Raj Ghat, New Delhi"],
+      ["National Museum",()=>"National Museum, Janpath, New Delhi"],
       ["India Gate",()=>"India Gate, New Delhi"],
-      ["Rashtrapati Bhavan",()=>"Rashtrapati Bhavan, New Delhi"],
-      ["Indira Gandhi Memorial",()=>"Indira Gandhi Memorial Museum, New Delhi"],
-      ["Red Fort",()=>"Red Fort, Delhi"],
-      ["Chandni Chowk",()=>"Chandni Chowk, Delhi"]
+      ["Connaught Place",()=>"Connaught Place, New Delhi"]
+    ]},
+    {day:"11 Oct",title:"Museum and lunch",subtitle:"Core route only; optional Sangrahalaya and nearby shopping not included",city:"Delhi",stops:[
+      ["Hotel / Karol Bagh",()=>state.delhiHotelAddress||"Karol Bagh, New Delhi"],
+      ["National Crafts Museum",()=>"National Crafts Museum, Pragati Maidan, New Delhi"],
+      ["Café Lota",()=>"Cafe Lota, National Crafts Museum, New Delhi"],
+      ["Hotel / Karol Bagh",()=>state.delhiHotelAddress||"Karol Bagh, New Delhi"]
     ]},
     {day:"12 Oct",title:"Amritsar first evening",subtitle:"Market → Heritage Street → Golden Temple",city:"Amritsar",stops:[
       ["Amritsar Junction",()=>"Amritsar Junction Railway Station, Amritsar"],
@@ -912,6 +916,6 @@
   if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}))}
 })();
 </script>
-<script src="./meals-expenses.js?v=3"></script>
+<script src="./meals-expenses.js?v=4"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
-const CACHE="trip-app-v13-food-expenses";
-const STATIC_ASSETS=["./","./index.html","./manifest.webmanifest","./icon.svg","./meals-expenses.js?v=3"];
+const CACHE="trip-app-v14-relaxed-delhi";
+const STATIC_ASSETS=["./","./index.html","./manifest.webmanifest","./icon.svg","./meals-expenses.js?v=4"];
 
 self.addEventListener("install",e=>{
   self.skipWaiting();
