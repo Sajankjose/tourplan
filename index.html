@@ -346,8 +346,10 @@
     <div class="card">
       <h2>Trip details</h2>
       <div class="grid2">
+        <div class="muted" style="grid-column:1/-1">Delhi hotel is not named in the Panicker’s quotation. Add the confirmed hotel name and address here when available; routes will then use the saved address.</div>
         <div><label>Delhi hotel name</label><input id="delhiHotelName" placeholder="Final hotel name" /></div>
         <div><label>Delhi hotel address</label><input id="delhiHotelAddress" placeholder="Full address for Maps" /></div>
+        <div class="muted" style="grid-column:1/-1">Amritsar: Hotel Ritz Plaza, 45, The Mall, Amritsar, Punjab 143001 (verified via hotel website).</div>
         <div><label>Amritsar hotel name</label><input id="amritsarHotelName" placeholder="Final hotel name" /></div>
         <div><label>Amritsar hotel address</label><input id="amritsarHotelAddress" placeholder="Full address for Maps" /></div>
         <div><label>Delhi driver phone</label><input id="delhiDriver" type="tel" placeholder="+91..." /></div>
@@ -473,7 +475,7 @@
       {text:"Keep luggage compact for the car boot",done:false,when:""}
     ],
     hotelNotes:"",foodNotes:"",generalNotes:"",
-    delhiHotelName:"",delhiHotelAddress:"",amritsarHotelName:"",amritsarHotelAddress:"",
+    delhiHotelName:"",delhiHotelAddress:"",amritsarHotelName:"Hotel Ritz Plaza",amritsarHotelAddress:"45, The Mall, Amritsar, Punjab 143001",
     delhiDriver:"",amritsarDriver:"",
     ticketSavedAt:["","",""],globalSavedAt:"",
     bookingDocsSeedVersion:0
@@ -571,6 +573,9 @@
       const s=Object.assign(clone(defaults),d);
       // Migrate only the previous default quote, not a custom user-entered package amount.
       if(Number(s.agencyCost)===33258)s.agencyCost=32235;
+      // Fill confirmed hotel details without overwriting user-edited values.
+      if(!String(s.amritsarHotelName||"").trim())s.amritsarHotelName="Hotel Ritz Plaza";
+      if(!String(s.amritsarHotelAddress||"").trim())s.amritsarHotelAddress="45, The Mall, Amritsar, Punjab 143001";
       s.tickets=defaults.tickets.map((t,i)=>Object.assign({},t,(d.tickets||[])[i]||{}));
       s.reminders=Array.isArray(d.reminders)?d.reminders.map(r=>({text:r.text||r.t||"",done:!!(r.done??r.d),when:r.when||""})):clone(defaults.reminders);
       s.expenses=Array.isArray(d.expenses)?d.expenses:[];
