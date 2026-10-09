@@ -1,4 +1,4 @@
-const CACHE="trip-app-v14-relaxed-delhi";
+const CACHE="trip-app-v15-hotel-address";
 const STATIC_ASSETS=["./","./index.html","./manifest.webmanifest","./icon.svg","./meals-expenses.js?v=4"];
 
 self.addEventListener("install",e=>{
