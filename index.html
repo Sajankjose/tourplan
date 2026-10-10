@@ -567,10 +567,23 @@
     s.bookingDocsSeedVersion=BOOKING_DOCS_SEED_VERSION;
     return s;
   }
+  // User supplied Day 1 actual expenses (10 October 2026).
+  // One-time migration keeps each item editable and prevents re-import after deletion.
+  const DAY1_EXPENSES=[{"id":"day1-20261010-01","date":"10 Oct","desc":"Airport car parking Kochi","amount":1750,"category":"Local transport","mode":"Not specified"},{"id":"day1-20261010-02","date":"10 Oct","desc":"Airport car parking Delhi (taxi)","amount":270,"category":"Local transport","mode":"Not specified"},{"id":"day1-20261010-03","date":"10 Oct","desc":"Breakfast","amount":600,"category":"Breakfast","mode":"Not specified"},{"id":"day1-20261010-04","date":"10 Oct","desc":"Auto","amount":60,"category":"Local transport","mode":"Not specified"},{"id":"day1-20261010-05","date":"10 Oct","desc":"Dress shopping Karol Bagh","amount":700,"category":"Shopping","mode":"Not specified"},{"id":"day1-20261010-06","date":"10 Oct","desc":"Day 1 tour package car","amount":3675,"category":"Local transport","mode":"Not specified"},{"id":"day1-20261010-07","date":"10 Oct","desc":"Red Fort ticket (two time)","amount":272,"category":"Entry tickets","mode":"Not specified"},{"id":"day1-20261010-08","date":"10 Oct","desc":"Red Fort food","amount":200,"category":"Food","mode":"Not specified"},{"id":"day1-20261010-09","date":"10 Oct","desc":"Souvenir","amount":1100,"category":"Shopping","mode":"Not specified"},{"id":"day1-20261010-10","date":"10 Oct","desc":"Parking Red Fort","amount":40,"category":"Local transport","mode":"Not specified"},{"id":"day1-20261010-11","date":"10 Oct","desc":"Lunch","amount":1780,"category":"Lunch","mode":"Not specified"},{"id":"day1-20261010-12","date":"10 Oct","desc":"Fine","amount":500,"category":"Other","mode":"Not specified"},{"id":"day1-20261010-13","date":"10 Oct","desc":"Lassi","amount":100,"category":"Snacks","mode":"Not specified"},{"id":"day1-20261010-14","date":"10 Oct","desc":"Hallythiram","amount":140,"category":"Snacks","mode":"Not specified"},{"id":"day1-20261010-15","date":"10 Oct","desc":"Fruit","amount":100,"category":"Snacks","mode":"Not specified"},{"id":"day1-20261010-16","date":"10 Oct","desc":"Red Fort car","amount":80,"category":"Local transport","mode":"Not specified"},{"id":"day1-20261010-17","date":"10 Oct","desc":"Bag","amount":100,"category":"Shopping","mode":"Not specified"},{"id":"day1-20261010-18","date":"10 Oct","desc":"Dinner","amount":986,"category":"Dinner","mode":"Not specified"},{"id":"day1-20261010-19","date":"10 Oct","desc":"Juice","amount":140,"category":"Snacks","mode":"Not specified"},{"id":"day1-20261010-20","date":"10 Oct","desc":"Bannana","amount":100,"category":"Snacks","mode":"Not specified"}];
+  function applyDay1ExpenseImport(s){
+    if(s.day1ExpensesImported20261010)return s;
+    s.expenses=Array.isArray(s.expenses)?s.expenses:[];
+    for(const e of DAY1_EXPENSES){
+      const already=s.expenses.some(x=>x.id===e.id || ((x.date||"")==="10 Oct" && (x.desc||"").trim().toLowerCase()===e.desc.toLowerCase() && Number(x.amount??x.a)===e.amount));
+      if(!already)s.expenses.push({...e});
+    }
+    s.day1ExpensesImported20261010=true;
+    return s;
+  }
   function load(){
     try{
       const raw=localStorage.getItem(KEY);
-      if(!raw)return applyBookingDocsSeed(clone(defaults));
+      if(!raw)return applyDay1ExpenseImport(applyBookingDocsSeed(clone(defaults)));
       const d=JSON.parse(raw);
       const s=Object.assign(clone(defaults),d);
       // Migrate only the previous default quote, not a custom user-entered package amount.
@@ -581,8 +594,8 @@
       s.tickets=defaults.tickets.map((t,i)=>Object.assign({},t,(d.tickets||[])[i]||{}));
       s.reminders=Array.isArray(d.reminders)?d.reminders.map(r=>({text:r.text||r.t||"",done:!!(r.done??r.d),when:r.when||""})):clone(defaults.reminders);
       s.expenses=Array.isArray(d.expenses)?d.expenses:[];
-      return applyBookingDocsSeed(s);
-    }catch(e){return applyBookingDocsSeed(clone(defaults))}
+      return applyDay1ExpenseImport(applyBookingDocsSeed(s));
+    }catch(e){return applyDay1ExpenseImport(applyBookingDocsSeed(clone(defaults)))}
   }
   let state=load();
   const save=()=>{
@@ -919,7 +932,7 @@
     bookingDocsSeedVersion:()=>Number(state.bookingDocsSeedVersion)||0
   };
 
-    bindTickets();renderExpenses();renderChecklist();renderSummary();renderToday();renderPhrases();renderMaps();refreshSaveStatuses();
+    // Persist the imported entries once so they survive offline reloads.\n    localStorage.setItem(KEY,JSON.stringify(state));\n    bindTickets();renderExpenses();renderChecklist();renderSummary();renderToday();renderPhrases();renderMaps();refreshSaveStatuses();
   if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}))}
 })();
 </script>
