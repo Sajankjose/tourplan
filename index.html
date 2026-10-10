@@ -932,7 +932,9 @@
     bookingDocsSeedVersion:()=>Number(state.bookingDocsSeedVersion)||0
   };
 
-    // Persist the imported entries once so they survive offline reloads.\n    localStorage.setItem(KEY,JSON.stringify(state));\n    bindTickets();renderExpenses();renderChecklist();renderSummary();renderToday();renderPhrases();renderMaps();refreshSaveStatuses();
+    // Persist the imported entries once so they survive offline reloads.
+    localStorage.setItem(KEY,JSON.stringify(state));
+    bindTickets();renderExpenses();renderChecklist();renderSummary();renderToday();renderPhrases();renderMaps();refreshSaveStatuses();
   if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}))}
 })();
 </script>
