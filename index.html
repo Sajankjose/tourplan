@@ -569,7 +569,7 @@
   }
   // User supplied Day 1 actual expenses (10 October 2026).
   // One-time migration keeps each item editable and prevents re-import after deletion.
-  const DAY1_EXPENSES=[{"id":"day1-20261010-01","date":"10 Oct","desc":"Airport car parking Kochi","amount":1750,"category":"Local transport","mode":"Not specified"},{"id":"day1-20261010-02","date":"10 Oct","desc":"Airport car parking Delhi (taxi)","amount":270,"category":"Local transport","mode":"Not specified"},{"id":"day1-20261010-03","date":"10 Oct","desc":"Breakfast","amount":600,"category":"Breakfast","mode":"Not specified"},{"id":"day1-20261010-04","date":"10 Oct","desc":"Auto","amount":60,"category":"Local transport","mode":"Not specified"},{"id":"day1-20261010-05","date":"10 Oct","desc":"Dress shopping Karol Bagh","amount":700,"category":"Shopping","mode":"Not specified"},{"id":"day1-20261010-06","date":"10 Oct","desc":"Day 1 tour package car","amount":3675,"category":"Local transport","mode":"Not specified"},{"id":"day1-20261010-07","date":"10 Oct","desc":"Red Fort ticket (two time)","amount":272,"category":"Entry tickets","mode":"Not specified"},{"id":"day1-20261010-08","date":"10 Oct","desc":"Red Fort food","amount":200,"category":"Food","mode":"Not specified"},{"id":"day1-20261010-09","date":"10 Oct","desc":"Souvenir","amount":1100,"category":"Shopping","mode":"Not specified"},{"id":"day1-20261010-10","date":"10 Oct","desc":"Parking Red Fort","amount":40,"category":"Local transport","mode":"Not specified"},{"id":"day1-20261010-11","date":"10 Oct","desc":"Lunch","amount":1780,"category":"Lunch","mode":"Not specified"},{"id":"day1-20261010-12","date":"10 Oct","desc":"Fine","amount":500,"category":"Other","mode":"Not specified"},{"id":"day1-20261010-13","date":"10 Oct","desc":"Lassi","amount":100,"category":"Snacks","mode":"Not specified"},{"id":"day1-20261010-14","date":"10 Oct","desc":"Hallythiram","amount":140,"category":"Snacks","mode":"Not specified"},{"id":"day1-20261010-15","date":"10 Oct","desc":"Fruit","amount":100,"category":"Snacks","mode":"Not specified"},{"id":"day1-20261010-16","date":"10 Oct","desc":"Red Fort car","amount":80,"category":"Local transport","mode":"Not specified"},{"id":"day1-20261010-17","date":"10 Oct","desc":"Bag","amount":100,"category":"Shopping","mode":"Not specified"},{"id":"day1-20261010-18","date":"10 Oct","desc":"Dinner","amount":986,"category":"Dinner","mode":"Not specified"},{"id":"day1-20261010-19","date":"10 Oct","desc":"Juice","amount":140,"category":"Snacks","mode":"Not specified"},{"id":"day1-20261010-20","date":"10 Oct","desc":"Bannana","amount":100,"category":"Snacks","mode":"Not specified"}];
+  const DAY1_EXPENSES=[{"id":"day1-20261010-01","date":"10 Oct","desc":"Airport car parking Kochi","amount":1750,"category":"Local transport","mode":"Not specified"},{"id":"day1-20261010-02","date":"10 Oct","desc":"Airport car parking Delhi (taxi)","amount":270,"category":"Local transport","mode":"Not specified"},{"id":"day1-20261010-03","date":"10 Oct","desc":"Breakfast","amount":600,"category":"Breakfast","mode":"Not specified"},{"id":"day1-20261010-04","date":"10 Oct","desc":"Auto","amount":60,"category":"Local transport","mode":"Not specified"},{"id":"day1-20261010-05","date":"10 Oct","desc":"Dress shopping Karol Bagh","amount":700,"category":"Shopping","mode":"Not specified"},{"id":"day1-20261010-06","date":"10 Oct","desc":"Day 1 tour package car","amount":3675,"category":"Local transport","mode":"Not specified"},{"id":"day1-20261010-07","date":"10 Oct","desc":"Red Fort ticket (two time)","amount":272,"category":"Entry tickets","mode":"Not specified"},{"id":"day1-20261010-08","date":"10 Oct","desc":"Red Fort food","amount":200,"category":"Food","mode":"Not specified"},{"id":"day1-20261010-09","date":"10 Oct","desc":"Souvenir","amount":1100,"category":"Shopping","mode":"Not specified"},{"id":"day1-20261010-10","date":"10 Oct","desc":"Parking Red Fort","amount":40,"category":"Local transport","mode":"Not specified"},{"id":"day1-20261010-11","date":"10 Oct","desc":"Lunch","amount":1780,"category":"Lunch","mode":"Not specified"},{"id":"day1-20261010-12","date":"10 Oct","desc":"Fine","amount":500,"category":"Other","mode":"Not specified"},{"id":"day1-20261010-13","date":"10 Oct","desc":"Lassi","amount":100,"category":"Snacks","mode":"Not specified"},{"id":"day1-20261010-14","date":"10 Oct","desc":"Haldiram","amount":140,"category":"Snacks","mode":"Not specified"},{"id":"day1-20261010-15","date":"10 Oct","desc":"Fruit","amount":100,"category":"Snacks","mode":"Not specified"},{"id":"day1-20261010-16","date":"10 Oct","desc":"Red Fort car","amount":80,"category":"Local transport","mode":"Not specified"},{"id":"day1-20261010-17","date":"10 Oct","desc":"Bag","amount":100,"category":"Shopping","mode":"Not specified"},{"id":"day1-20261010-18","date":"10 Oct","desc":"Dinner","amount":986,"category":"Dinner","mode":"Not specified"},{"id":"day1-20261010-19","date":"10 Oct","desc":"Juice","amount":140,"category":"Snacks","mode":"Not specified"},{"id":"day1-20261010-20","date":"10 Oct","desc":"Bannana","amount":100,"category":"Snacks","mode":"Not specified"}];
   function applyDay1ExpenseImport(s){
     if(s.day1ExpensesImported20261010)return s;
     s.expenses=Array.isArray(s.expenses)?s.expenses:[];
@@ -580,10 +580,27 @@
     s.day1ExpensesImported20261010=true;
     return s;
   }
+  // Recorded actual expenses, Sunday 11 October 2026. Preserve individual amounts.
+  const DAY2_EXPENSES=[{"id":"day2-20261011-01","date":"11 Oct","desc":"Breakfast Bikanerwala","amount":673,"category":"Breakfast","mode":"Not specified"},{"id":"day2-20261011-02","date":"11 Oct","desc":"Bikanerwala Snacks","amount":414,"category":"Snacks","mode":"Not specified"},{"id":"day2-20261011-03","date":"11 Oct","desc":"Rail Museum tickets","amount":500,"category":"Entry tickets","mode":"Not specified"},{"id":"day2-20261011-04","date":"11 Oct","desc":"Rail Museum souvenirs","amount":100,"category":"Shopping","mode":"Not specified"},{"id":"day2-20261011-05","date":"11 Oct","desc":"Rail Museum parking","amount":40,"category":"Local transport","mode":"Not specified"},{"id":"day2-20261011-06","date":"11 Oct","desc":"Indira Gandhi Memorial souvenir","amount":160,"category":"Shopping","mode":"Not specified"},{"id":"day2-20261011-07","date":"11 Oct","desc":"Prime Ministers' Museum tickets","amount":750,"category":"Entry tickets","mode":"Not specified"},{"id":"day2-20261011-08","date":"11 Oct","desc":"Prime Ministers' Museum souvenir","amount":425,"category":"Shopping","mode":"Not specified"},{"id":"day2-20261011-09","date":"11 Oct","desc":"Andhra Bhavan lunch","amount":950,"category":"Lunch","mode":"Not specified"},{"id":"day2-20261011-10","date":"11 Oct","desc":"Andhra Bhavan shopping","amount":330,"category":"Shopping","mode":"Not specified"},{"id":"day2-20261011-11","date":"11 Oct","desc":"National Museum tickets","amount":40,"category":"Entry tickets","mode":"Not specified"},{"id":"day2-20261011-12","date":"11 Oct","desc":"National Museum souvenir","amount":120,"category":"Shopping","mode":"Not specified"},{"id":"day2-20261011-13","date":"11 Oct","desc":"Driver tip","amount":500,"category":"Local transport","mode":"Not specified"},{"id":"day2-20261011-14","date":"11 Oct","desc":"Medicine","amount":30,"category":"Other","mode":"Not specified"},{"id":"day2-20261011-15","date":"11 Oct","desc":"Bikanerwala dinner","amount":1145,"category":"Dinner","mode":"Not specified"},{"id":"day2-20261011-16","date":"11 Oct","desc":"Bikanerwala gift","amount":916,"category":"Shopping","mode":"Not specified"},{"id":"day2-20261011-17","date":"11 Oct","desc":"Bikanerwala kulfi","amount":236,"category":"Snacks","mode":"Not specified"},{"id":"day2-20261011-18","date":"11 Oct","desc":"Crafts Museum chain","amount":300,"category":"Shopping","mode":"Not specified"}];
+  function applyDay2ExpenseImport(s){
+    if(s.day2ExpensesImported20261011)return s;
+    s.expenses=Array.isArray(s.expenses)?s.expenses:[];
+    for(const e of DAY2_EXPENSES){
+      if(!s.expenses.some(x=>x.id===e.id || ((x.date||"")==="11 Oct" && (x.desc||"").trim().toLowerCase()===e.desc.toLowerCase() && Number(x.amount??x.a)===e.amount)))s.expenses.push({...e});
+    }
+    s.day2ExpensesImported20261011=true;
+    return s;
+  }
+  function correctDay1Spelling(s){
+    if(!Array.isArray(s.expenses))return s;
+    for(const e of s.expenses){if(e.date==="10 Oct" && /Hallythiram/i.test(e.desc||""))e.desc=e.desc.replace(/Hallythiram/gi,"Haldiram");}
+    return s;
+  }
+  function applyExpenseUpdates(s){return correctDay1Spelling(applyDay2ExpenseImport(applyDay1ExpenseImport(s)));}
   function load(){
     try{
       const raw=localStorage.getItem(KEY);
-      if(!raw)return applyDay1ExpenseImport(applyBookingDocsSeed(clone(defaults)));
+      if(!raw)return applyExpenseUpdates(applyBookingDocsSeed(clone(defaults)));
       const d=JSON.parse(raw);
       const s=Object.assign(clone(defaults),d);
       // Migrate only the previous default quote, not a custom user-entered package amount.
@@ -594,8 +611,8 @@
       s.tickets=defaults.tickets.map((t,i)=>Object.assign({},t,(d.tickets||[])[i]||{}));
       s.reminders=Array.isArray(d.reminders)?d.reminders.map(r=>({text:r.text||r.t||"",done:!!(r.done??r.d),when:r.when||""})):clone(defaults.reminders);
       s.expenses=Array.isArray(d.expenses)?d.expenses:[];
-      return applyDay1ExpenseImport(applyBookingDocsSeed(s));
-    }catch(e){return applyDay1ExpenseImport(applyBookingDocsSeed(clone(defaults)))}
+      return applyExpenseUpdates(applyBookingDocsSeed(s));
+    }catch(e){return applyExpenseUpdates(applyBookingDocsSeed(clone(defaults)))}
   }
   let state=load();
   const save=()=>{
