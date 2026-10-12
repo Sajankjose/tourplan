@@ -263,7 +263,7 @@
         <div class="actions"><button class="btn" type="submit">Add expense</button></div>
       </form>
     </div>
-    <div class="card"><h3>Expense log</h3><div id="expenseList" class="muted">No daily expenses added yet.</div><div class="actions"><button id="clearExpenses" class="btn danger" type="button">Clear daily expenses</button></div></div>
+    <div class="card"><h3>Expense log</h3><div class="card"><h3>Category-wise spending</h3><p class="muted">Actual expenses recorded, excluding package and booked tickets. Updates as you add or remove expenses.</p><div id="expenseCategoryTotals"></div><div id="expenseDayTotals"></div></div><div id="expenseList" class="muted">No daily expenses added yet.</div><div class="actions"><button id="clearExpenses" class="btn danger" type="button">Clear daily expenses</button></div></div>
   </section>
 
   <section class="section" id="tickets">
@@ -596,7 +596,18 @@
     for(const e of s.expenses){if(e.date==="10 Oct" && /Hallythiram/i.test(e.desc||""))e.desc=e.desc.replace(/Hallythiram/gi,"Haldiram");}
     return s;
   }
-  function applyExpenseUpdates(s){return correctDay1Spelling(applyDay2ExpenseImport(applyDay1ExpenseImport(s)));}
+  const DAY3_EXPENSES=[{"id":"day3-20261012-01","date":"12 Oct","desc":"Auto","amount":100,"category":"Local transport","mode":"Not specified"},{"id":"day3-20261012-02","date":"12 Oct","desc":"Dress","amount":900,"category":"Shopping","mode":"Not specified"},{"id":"day3-20261012-03","date":"12 Oct","desc":"Sandal shop 3","amount":1000,"category":"Shopping","mode":"Not specified"},{"id":"day3-20261012-04","date":"12 Oct","desc":"Sandal shop 1","amount":1200,"category":"Shopping","mode":"Not specified"},{"id":"day3-20261012-05","date":"12 Oct","desc":"Sandal shop 2","amount":450,"category":"Shopping","mode":"Not specified"},{"id":"day3-20261012-06","date":"12 Oct","desc":"Lassi","amount":530,"category":"Snacks","mode":"Not specified"},{"id":"day3-20261012-07","date":"12 Oct","desc":"Auto","amount":80,"category":"Local transport","mode":"Not specified"},{"id":"day3-20261012-08","date":"12 Oct","desc":"Book","amount":250,"category":"Shopping","mode":"Not specified"},{"id":"day3-20261012-09","date":"12 Oct","desc":"Auto","amount":500,"category":"Local transport","mode":"Not specified"},{"id":"day3-20261012-10","date":"12 Oct","desc":"Dessert","amount":110,"category":"Snacks","mode":"Not specified"},{"id":"day3-20261012-11","date":"12 Oct","desc":"Tandoori","amount":550,"category":"Food","mode":"Not specified"}];
+  function applyDay3ExpenseImport(s){
+    if(s.day3ExpensesImported20261012)return s;
+    s.expenses=Array.isArray(s.expenses)?s.expenses:[];
+    // Repeated Auto payments are separate transactions; match by occurrence count rather than by amount alone.
+    for(const e of DAY3_EXPENSES){
+      if(!s.expenses.some(x=>x.id===e.id))s.expenses.push({...e});
+    }
+    s.day3ExpensesImported20261012=true;
+    return s;
+  }
+  function applyExpenseUpdates(s){return correctDay1Spelling(applyDay3ExpenseImport(applyDay2ExpenseImport(applyDay1ExpenseImport(s))));}
   function load(){
     try{
       const raw=localStorage.getItem(KEY);
@@ -745,7 +756,22 @@
   budgetEl.addEventListener("input",()=>{state.budget=Math.max(0,Number(budgetEl.value)||0);save()});
   agencyEl.addEventListener("input",()=>{state.agencyCost=Math.max(0,Number(agencyEl.value)||0);save()});
 
+  function renderExpenseBreakdown(){
+    const sums={},days={};for(const e of state.expenses){
+      const cat=e.category||e.c||"Other",day=e.date||"Undated",amount=Number(e.amount??e.a)||0;
+      sums[cat]=(sums[cat]||0)+amount;days[day]=(days[day]||0)+amount;
+    }
+    const write=(id,data)=>{const el=document.getElementById(id);if(!el)return;el.replaceChildren();for(const [name,amount] of Object.entries(data).sort((a,b)=>b[1]-a[1])){
+      const row=document.createElement("div");row.className="expense-row";
+      const label=document.createElement("span");label.textContent=name;
+      const value=document.createElement("strong");value.textContent=money(amount);
+      row.append(label,value);el.append(row);
+    }};
+    write("expenseCategoryTotals",sums);
+    const dayEl=document.getElementById("expenseDayTotals");if(dayEl){dayEl.replaceChildren();const h=document.createElement("h3");h.style.marginTop="16px";h.textContent="Day-wise total";dayEl.append(h);for(const [day,amount] of Object.entries(days).sort((a,b)=>a[0].localeCompare(b[0]))){const row=document.createElement("div");row.className="expense-row";const label=document.createElement("span");label.textContent=day;const value=document.createElement("strong");value.textContent=money(amount);row.append(label,value);dayEl.append(row);}}
+  }
   function renderExpenses(){
+    renderExpenseBreakdown();
     const list=document.getElementById("expenseList");list.innerHTML="";
     if(!state.expenses.length){list.textContent="No daily expenses added yet.";list.className="muted";return}
     list.className="";
