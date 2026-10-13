@@ -607,7 +607,15 @@
     s.day3ExpensesImported20261012=true;
     return s;
   }
-  function applyExpenseUpdates(s){return correctDay1Spelling(applyDay3ExpenseImport(applyDay2ExpenseImport(applyDay1ExpenseImport(s))));}
+  const DAY4_EXPENSES=[{"id":"day4-20261013-01","date":"13 Oct","desc":"Parking golden temple","amount":30,"category":"Local transport","mode":"Not specified"},{"id":"day4-20261013-02","date":"13 Oct","desc":"Souvenir","amount":80,"category":"Shopping","mode":"Not specified"},{"id":"day4-20261013-03","date":"13 Oct","desc":"Bangle","amount":100,"category":"Shopping","mode":"Not specified"},{"id":"day4-20261013-04","date":"13 Oct","desc":"Lassi","amount":60,"category":"Snacks","mode":"Not specified"},{"id":"day4-20261013-05","date":"13 Oct","desc":"Model","amount":480,"category":"Shopping","mode":"Not specified"},{"id":"day4-20261013-06","date":"13 Oct","desc":"Souvenir","amount":200,"category":"Shopping","mode":"Not specified"},{"id":"day4-20261013-07","date":"13 Oct","desc":"Kata","amount":200,"category":"Shopping","mode":"Not specified"},{"id":"day4-20261013-08","date":"13 Oct","desc":"Souvenir","amount":100,"category":"Shopping","mode":"Not specified"},{"id":"day4-20261013-09","date":"13 Oct","desc":"Churadar","amount":2500,"category":"Shopping","mode":"Not specified"},{"id":"day4-20261013-10","date":"13 Oct","desc":"Lunch","amount":2426,"category":"Lunch","mode":"Not specified"},{"id":"day4-20261013-11","date":"13 Oct","desc":"Bag","amount":350,"category":"Shopping","mode":"Not specified"},{"id":"day4-20261013-12","date":"13 Oct","desc":"Snacks","amount":230,"category":"Snacks","mode":"Not specified"},{"id":"day4-20261013-13","date":"13 Oct","desc":"T-shirt","amount":300,"category":"Shopping","mode":"Not specified"},{"id":"day4-20261013-14","date":"13 Oct","desc":"Souvenir","amount":50,"category":"Shopping","mode":"Not specified"},{"id":"day4-20261013-15","date":"13 Oct","desc":"Sweets","amount":965,"category":"Snacks","mode":"Not specified"},{"id":"day4-20261013-16","date":"13 Oct","desc":"Auto","amount":150,"category":"Local transport","mode":"Not specified"},{"id":"day4-20261013-17","date":"13 Oct","desc":"Pappad","amount":530,"category":"Snacks","mode":"Not specified"}];
+  function applyDay4ExpenseImport(s){
+    if(s.day4ExpensesImported20261013)return s;
+    s.expenses=Array.isArray(s.expenses)?s.expenses:[];
+    for(const e of DAY4_EXPENSES){if(!s.expenses.some(x=>x.id===e.id))s.expenses.push({...e});}
+    s.day4ExpensesImported20261013=true;
+    return s;
+  }
+  function applyExpenseUpdates(s){return correctDay1Spelling(applyDay4ExpenseImport(applyDay3ExpenseImport(applyDay2ExpenseImport(applyDay1ExpenseImport(s)))));}
   function load(){
     try{
       const raw=localStorage.getItem(KEY);
