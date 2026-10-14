@@ -126,6 +126,7 @@
     <button class="tab" data-target="plan">Plan</button>
     <button class="tab" data-target="maps">Maps</button>
     <button class="tab" data-target="expenses">Expenses</button>
+    <button class="tab" data-target="insights">Trip Insights</button>
     <button class="tab" data-target="tickets">Tickets</button>
     <button class="tab" data-target="hindi">Hindi Help</button>
     <button class="tab" data-target="reminders">Reminders</button>
@@ -232,6 +233,8 @@
     </div>
     <div id="routeCards"></div>
   </section>
+
+  <section class="section" id="insights"></section>
 
   <section class="section" id="expenses">
     <div class="card">
@@ -380,6 +383,7 @@
     <div class="card">
       <h2>More</h2>
       <div class="more-grid">
+        <button class="more-card" data-go="insights"><b>📊 Trip Insights</b><span>All-in trip cost, categories, lessons and next-trip budget</span></button>
         <button class="more-card" data-go="tickets"><b>🎫 Tickets</b><span>PNR, seats, costs and travel notes</span></button>
         <button class="more-card" data-go="hindi"><b>अ Hindi Help</b><span>Offline phrases + large display</span></button>
         <button class="more-card" data-go="reminders"><b>✓ Reminders</b><span>Checklist and due times</span></button>
@@ -534,7 +538,7 @@
       )
     });
 
-    s.agencyCost=33258;
+    if(!Number(s.agencyCost) || Number(s.agencyCost)===33258)s.agencyCost=32235;
 
     if(!String(s.delhiHotelName||"").trim())s.delhiHotelName="Royal Comfort or similar (Panicker’s)";
     if(!String(s.delhiHotelName||"").trim())s.delhiHotelName="Treebo Royal Comfort";
@@ -645,6 +649,7 @@
   const save=()=>{
     localStorage.setItem(KEY,JSON.stringify(state));
     renderSummary();renderToday();
+    window.dispatchEvent(new Event("trip:insights-update"));
     window.dispatchEvent(new CustomEvent("trip:local-save",{detail:{state:clone(state)}}));
   };
   const money=n=>"₹"+(Number(n)||0).toLocaleString("en-IN");
@@ -662,6 +667,7 @@
     document.querySelectorAll("[data-target]").forEach(b=>b.classList.toggle("active",b.dataset.target===id));
     window.scrollTo({top:0,behavior:"smooth"});
     if(id==="maps")renderMaps();
+    if(id==="insights")window.dispatchEvent(new Event("trip:insights-open"));
   }
   document.querySelectorAll("[data-target]").forEach(b=>b.addEventListener("click",()=>showSection(b.dataset.target)));
   document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>showSection(b.dataset.go)));
@@ -998,5 +1004,6 @@
 })();
 </script>
 <script src="./meals-expenses.js?v=4"></script>
+<script src="./expense-insights.js?v=1"></script>
 </body>
 </html>
