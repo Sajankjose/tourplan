@@ -1,5 +1,5 @@
-const CACHE="trip-app-v21-day5-expenses";
-const STATIC_ASSETS=["./","./index.html","./manifest.webmanifest","./icon.svg","./meals-expenses.js?v=4"];
+const CACHE="trip-app-v22-expense-insights";
+const STATIC_ASSETS=["./","./index.html","./manifest.webmanifest","./icon.svg","./meals-expenses.js?v=4","./expense-insights.js?v=1"];
 
 self.addEventListener("install",e=>{
   self.skipWaiting();
