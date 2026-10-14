@@ -615,7 +615,15 @@
     s.day4ExpensesImported20261013=true;
     return s;
   }
-  function applyExpenseUpdates(s){return correctDay1Spelling(applyDay4ExpenseImport(applyDay3ExpenseImport(applyDay2ExpenseImport(applyDay1ExpenseImport(s)))));}
+  const DAY5_EXPENSES=[{"id":"day5-20261014-01","date":"14 Oct","desc":"Driver tip","amount":500,"category":"Local transport","mode":"Not specified"},{"id":"day5-20261014-02","date":"14 Oct","desc":"Airport water","amount":130,"category":"Snacks","mode":"Not specified"},{"id":"day5-20261014-03","date":"14 Oct","desc":"Airport cool drinks","amount":400,"category":"Snacks","mode":"Not specified"},{"id":"day5-20261014-04","date":"14 Oct","desc":"Hot Wheels","amount":175,"category":"Shopping","mode":"Not specified"},{"id":"day5-20261014-05","date":"14 Oct","desc":"Salkara restaurant","amount":1720,"category":"Food","mode":"Not specified"}];
+  function applyDay5ExpenseImport(s){
+    if(s.day5ExpensesImported20261014)return s;
+    s.expenses=Array.isArray(s.expenses)?s.expenses:[];
+    for(const e of DAY5_EXPENSES){if(!s.expenses.some(x=>x.id===e.id))s.expenses.push({...e});}
+    s.day5ExpensesImported20261014=true;
+    return s;
+  }
+  function applyExpenseUpdates(s){return correctDay1Spelling(applyDay5ExpenseImport(applyDay4ExpenseImport(applyDay3ExpenseImport(applyDay2ExpenseImport(applyDay1ExpenseImport(s))))));}
   function load(){
     try{
       const raw=localStorage.getItem(KEY);
