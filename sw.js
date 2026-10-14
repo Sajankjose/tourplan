@@ -1,4 +1,4 @@
-const CACHE="trip-app-v20-day4-expenses";
+const CACHE="trip-app-v21-day5-expenses";
 const STATIC_ASSETS=["./","./index.html","./manifest.webmanifest","./icon.svg","./meals-expenses.js?v=4"];
 
 self.addEventListener("install",e=>{
